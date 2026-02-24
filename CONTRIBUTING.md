@@ -4,7 +4,7 @@ If you want to contribute to the source you're highly welcome!
 
 ## Prerequisites
 
-* .NET SDK 6.0+
+* [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
 * PowerShell 5.1+ or PowerShell 7+
 
 ## Build
@@ -21,16 +21,15 @@ dotnet build -c Release
 
 ## Test
 
-Import the module and run it against the sample assembly:
+```powershell
+dotnet test
+```
+
+## Load the Module Locally
 
 ```powershell
 Import-Module ./out/Spy
-
-# Discover all surfaces
-Get-SpySurface -Path ./SampleApi.dll
-
-# Check for security issues
-Find-SpyVulnerability -Path ./SampleApi.dll
+Get-SpySurface -Path ./MyApi.dll
 ```
 
 ## Project Structure
@@ -40,14 +39,27 @@ spy/
 ├── src/
 │   ├── Spy.Core/              # Core library (netstandard2.0)
 │   │   ├── Contracts/         # Data models
+│   │   ├── Helpers/           # Reflection utilities
 │   │   └── Services/          # Discovery and analysis logic
 │   └── Spy.PowerShell/        # PowerShell module (netstandard2.0)
 │       ├── Commands/          # Cmdlets
 │       └── Formatters/        # ps1xml formatting
-├── samples/                   # Sample controllers and hubs
+├── tests/
+│   └── Spy.Core.Tests/        # xUnit tests
+│       ├── Fixtures/          # Fake ASP.NET types and sample controllers/hubs
+│       ├── Helpers/           # ReflectionHelper tests
+│       └── Services/          # Discovery, scanner, and analyzer tests
 ├── docs/                      # Documentation
 └── Spy.sln
 ```
+
+## How It Works
+
+Spy loads .NET assemblies via `System.Reflection` and scans for types that represent input surfaces:
+
+**HTTP Endpoints** — Classes inheriting from `ControllerBase`, `Controller`, or `ApiController`; classes with `[ApiController]`; or classes named `*Controller` with public action methods. Routes are resolved by combining controller-level and action-level templates, with support for `[controller]` and `[action]` tokens.
+
+**SignalR Hub Methods** — Classes inheriting from `Hub` or `Hub<T>`. Public instance methods are discovered, excluding lifecycle methods like `OnConnectedAsync`. Routes use conventional naming (strip "Hub" suffix) since actual `MapHub<T>("/route")` calls aren't discoverable via reflection.
 
 ## Adding a New Discovery Type
 
@@ -57,7 +69,7 @@ To add a new surface type (e.g. gRPC, minimal APIs):
 2. Create a new class extending `InputSurface` in `src/Spy.Core/Contracts/`
 3. Create a new `IDiscovery` implementation in `src/Spy.Core/Services/`
 4. Add security analysis rules in `AssemblyScanner.AnalyzeSecurityIssues`
-5. Wire it up in the cmdlet constructors (`GetSpySurfaceCommand`, `FindSpyVulnerabilityCommand`)
+5. Wire it up in `ScannerFactory.Create()`
 6. Add formatting views in `Spy.Format.ps1xml`
 
 ## Releasing a New Version

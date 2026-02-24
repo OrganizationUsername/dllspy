@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Spy.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
   </ItemGroup>
 
