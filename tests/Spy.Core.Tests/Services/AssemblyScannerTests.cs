@@ -25,13 +25,14 @@ namespace Spy.Core.Tests.Services
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.HttpEndpoint);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.SignalRMethod);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.WcfOperation);
+            Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.GrpcOperation);
         }
 
         [Fact]
         public void TotalSurfaces_IsCorrect()
         {
-            // 12 HTTP + 5 SignalR + 6 WCF = 23
-            Assert.Equal(23, _report.TotalSurfaces);
+            // 12 HTTP + 5 SignalR + 6 WCF + 6 gRPC = 29
+            Assert.Equal(29, _report.TotalSurfaces);
         }
 
         [Fact]
@@ -49,22 +50,23 @@ namespace Spy.Core.Tests.Services
         [Fact]
         public void TotalClasses_IsCorrect()
         {
-            // Users, Admin, Public, Plain, ChatHub, NotificationHub, LifecycleHub, OrderService, SecureService, IAuditService
-            Assert.Equal(10, _report.TotalClasses);
+            // Users, Admin, Public, Plain, ChatHub, NotificationHub, LifecycleHub, OrderService, SecureService, IAuditService, GreeterService, OrderGrpcService
+            Assert.Equal(12, _report.TotalClasses);
         }
 
         [Fact]
         public void AuthenticatedSurfaces_CountIsCorrect()
         {
-            // Update, Delete, GetDashboard, CreateSetting, Subscribe, Broadcast, GetStatus, UpdateConfig
-            Assert.Equal(8, _report.AuthenticatedSurfaces);
+            // Update, Delete, GetDashboard, CreateSetting, Subscribe, Broadcast, GetStatus, UpdateConfig,
+            // gRPC: OrderGrpcService.GetOrder, PlaceOrder, StreamOrders, Chat
+            Assert.Equal(12, _report.AuthenticatedSurfaces);
         }
 
         [Fact]
         public void AnonymousSurfaces_CountIsCorrect()
         {
-            // AllowAnonymous or !RequiresAuthorization = 15
-            Assert.Equal(15, _report.AnonymousSurfaces);
+            // AllowAnonymous or !RequiresAuthorization = 17
+            Assert.Equal(17, _report.AnonymousSurfaces);
         }
 
         [Fact]
@@ -74,7 +76,8 @@ namespace Spy.Core.Tests.Services
             // HTTP: UsersController.Create (POST), PublicController.Submit (POST)
             // SignalR: ChatHub.SendMessage, ChatHub.JoinRoom, LifecycleHub.SendPing
             // WCF: IOrderService.GetOrder, IOrderService.PlaceOrder, IOrderService.NotifyShipped, IAuditService.LogEvent
-            Assert.Equal(9, highIssues.Count);
+            // gRPC: GreeterService.SayHello, GreeterService.SayHellos
+            Assert.Equal(11, highIssues.Count);
         }
 
         [Fact]
@@ -89,20 +92,27 @@ namespace Spy.Core.Tests.Services
         public void LowSeverityIssues_ForAuthWithoutRoles()
         {
             var lowIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.Low).ToList();
-            // UsersController.Update, NotificationHub.Subscribe, SecureService.GetStatus
-            Assert.Equal(3, lowIssues.Count);
+            // UsersController.Update, NotificationHub.Subscribe, SecureService.GetStatus,
+            // gRPC: OrderGrpcService.GetOrder, OrderGrpcService.StreamOrders, OrderGrpcService.Chat
+            Assert.Equal(6, lowIssues.Count);
         }
 
         [Fact]
         public void TotalSecurityIssues_IsCorrect()
         {
-            Assert.Equal(16, _report.TotalSecurityIssues);
+            Assert.Equal(21, _report.TotalSecurityIssues);
         }
 
         [Fact]
         public void TotalWcfOperations_IsCorrect()
         {
             Assert.Equal(6, _report.TotalWcfOperations);
+        }
+
+        [Fact]
+        public void TotalGrpcOperations_IsCorrect()
+        {
+            Assert.Equal(6, _report.TotalGrpcOperations);
         }
 
         [Fact]

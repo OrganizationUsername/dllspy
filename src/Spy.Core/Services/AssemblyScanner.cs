@@ -162,6 +162,9 @@ namespace Spy.Core.Services
                     case WcfOperation wcf:
                         issues.AddRange(AnalyzeWcfOperation(wcf));
                         break;
+                    case GrpcOperation grpc:
+                        issues.AddRange(AnalyzeGrpcOperation(grpc));
+                        break;
                 }
             }
 
@@ -305,6 +308,48 @@ namespace Spy.Core.Services
                     ClassName = operation.ClassName,
                     MethodName = operation.MethodName,
                     Recommendation = "Consider adding Role to the [PrincipalPermission] attribute to restrict access."
+                });
+            }
+
+            return issues;
+        }
+
+        private static List<SecurityIssue> AnalyzeGrpcOperation(GrpcOperation operation)
+        {
+            var issues = new List<SecurityIssue>();
+
+            // HIGH: Unauthenticated gRPC operation (direct invocation surface)
+            if (!operation.RequiresAuthorization && !operation.AllowAnonymous)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Unauthenticated gRPC operation",
+                    Description = $"The gRPC operation '{operation.ServiceName}/{operation.MethodName}' on {operation.ClassName} " +
+                                  $"does not require authentication. gRPC operations are directly invocable by clients.",
+                    Severity = SecuritySeverity.High,
+                    SurfaceRoute = operation.DisplayRoute,
+                    SurfaceType = SurfaceType.GrpcOperation,
+                    ClassName = operation.ClassName,
+                    MethodName = operation.MethodName,
+                    Recommendation = $"Add [Authorize] attribute to the {operation.ClassName} class or its methods."
+                });
+            }
+
+            // LOW: [Authorize] without roles or policies
+            if (operation.RequiresAuthorization && !operation.AllowAnonymous &&
+                operation.Roles.Count == 0 && operation.Policies.Count == 0)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Authorize without role or policy restriction",
+                    Description = $"The gRPC operation '{operation.ServiceName}/{operation.MethodName}' on {operation.ClassName} " +
+                                  $"requires authentication but does not specify roles or policies. Any authenticated user can invoke it.",
+                    Severity = SecuritySeverity.Low,
+                    SurfaceRoute = operation.DisplayRoute,
+                    SurfaceType = SurfaceType.GrpcOperation,
+                    ClassName = operation.ClassName,
+                    MethodName = operation.MethodName,
+                    Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
                 });
             }
 

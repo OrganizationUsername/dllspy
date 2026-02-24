@@ -14,7 +14,8 @@ namespace Spy.Core.Services
             return new AssemblyScanner(
                 new HttpEndpointDiscovery(analyzer),
                 new SignalRDiscovery(analyzer),
-                new WcfDiscovery(analyzer));
+                new WcfDiscovery(analyzer),
+                new GrpcDiscovery(analyzer));
         }
     }
 }

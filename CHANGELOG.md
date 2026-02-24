@@ -1,5 +1,19 @@
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-24
+
+### Added
+- **WCF service operation discovery** — detects `[ServiceContract]` interfaces, resolves implementing classes via `IsAssignableFrom`, extracts `[OperationContract]` methods
+- **gRPC service operation discovery** — detects services inheriting from generated gRPC base classes (via `BindService` detection), identifies all four streaming modes (Unary, ServerStreaming, ClientStreaming, BidiStreaming)
+- `WcfOperation` surface type with `ContractName`, `ServiceNamespace`, `IsOneWay` properties
+- `GrpcOperation` surface type with `ServiceName`, `MethodType` properties
+- `[PrincipalPermission]` recognized as an authorization attribute (WCF security model)
+- WCF security rules: unauthenticated operation (High), authorize without role (Low)
+- gRPC security rules: unauthenticated operation (High), authorize without role/policy (Low)
+- `TotalWcfOperations` and `TotalGrpcOperations` computed properties on `AssemblyReport`
+- Custom formatting views for `WcfOperation` and `GrpcOperation` (table and list)
+- Contract-only WCF detection (interface without implementation class)
+
 ## [0.1.0] - 2026-02-24
 
 ### Added

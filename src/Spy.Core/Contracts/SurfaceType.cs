@@ -10,6 +10,8 @@ namespace Spy.Core.Contracts
         /// <summary>A callable method on a SignalR hub.</summary>
         SignalRMethod,
         /// <summary>An operation on a WCF service contract.</summary>
-        WcfOperation
+        WcfOperation,
+        /// <summary>An operation on a gRPC service.</summary>
+        GrpcOperation
     }
 }

@@ -4,7 +4,7 @@
     RootModule = 'Spy.PowerShell.dll'
 
     # Version number of this module.
-    ModuleVersion = '0.1.0'
+    ModuleVersion = '0.2.0'
 
     # ID used to uniquely identify this module
     GUID = 'f7e8a9b0-1c2d-3e4f-5a6b-7c8d9e0f1a2b'
@@ -19,7 +19,7 @@
     Copyright = '(c) Anton Lindström. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description = 'Discovers and analyzes input surfaces (HTTP endpoints, SignalR hubs, etc.) in compiled .NET assemblies using reflection. Identifies security vulnerabilities, maps routes, and generates reports.'
+    Description = 'Discovers and analyzes input surfaces (HTTP endpoints, SignalR hubs, WCF services, gRPC services) in compiled .NET assemblies using reflection. Identifies security vulnerabilities, maps routes, and generates reports — all without running the application.'
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion = '5.1'
@@ -55,16 +55,16 @@
     PrivateData = @{
         PSData = @{
             # Tags applied to this module for discoverability in online galleries
-            Tags = @('security', 'aspnet', 'webapi', 'signalr', 'websocket', 'reflection', 'endpoints', 'vulnerability', 'audit')
+            Tags = @('security', 'aspnet', 'webapi', 'signalr', 'wcf', 'grpc', 'reflection', 'endpoints', 'vulnerability', 'audit')
 
             # A URL to the license for this module.
-            LicenseUri = ''
+            LicenseUri = 'https://github.com/n7on/spy/blob/main/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri = ''
+            ProjectUri = 'https://github.com/n7on/spy'
 
             # Release notes for this module
-            ReleaseNotes = 'Initial release with multi-surface discovery: HTTP endpoints and SignalR hub methods.'
+            ReleaseNotes = 'Discover HTTP endpoints, SignalR hubs, WCF services, and gRPC services. Security analysis with severity-based vulnerability detection.'
         }
     }
 

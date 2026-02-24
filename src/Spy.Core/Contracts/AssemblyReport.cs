@@ -36,6 +36,9 @@ namespace Spy.Core.Contracts
         /// <summary>Gets the number of WCF operations discovered.</summary>
         public int TotalWcfOperations => Surfaces.Count(s => s.SurfaceType == SurfaceType.WcfOperation);
 
+        /// <summary>Gets the number of gRPC operations discovered.</summary>
+        public int TotalGrpcOperations => Surfaces.Count(s => s.SurfaceType == SurfaceType.GrpcOperation);
+
         /// <summary>Gets the number of distinct classes found.</summary>
         public int TotalClasses => Surfaces.Select(s => s.ClassName).Distinct().Count();
 

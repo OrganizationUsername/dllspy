@@ -389,6 +389,130 @@
       </ListControl>
     </View>
 
+    <!-- GrpcOperation Table View -->
+    <View>
+      <Name>Spy.Core.Contracts.GrpcOperation</Name>
+      <ViewSelectedBy>
+        <TypeName>Spy.Core.Contracts.GrpcOperation</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Service</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Method</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Class</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Streaming</Label>
+            <Width>16</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Auth</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>'gRPC'</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ServiceName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>MethodName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ClassName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>MethodType</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.RequiresAuthorization) { 'Yes' }
+                  elseif ($_.AllowAnonymous) { 'Anon' }
+                  else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+    <!-- GrpcOperation List View -->
+    <View>
+      <Name>Spy.Core.Contracts.GrpcOperation.List</Name>
+      <ViewSelectedBy>
+        <TypeName>Spy.Core.Contracts.GrpcOperation</TypeName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>Service</Label>
+                <PropertyName>ServiceName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Method</Label>
+                <PropertyName>MethodName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Class</Label>
+                <PropertyName>ClassName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Method Type</Label>
+                <PropertyName>MethodType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Requires Auth</Label>
+                <PropertyName>RequiresAuthorization</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Allow Anonymous</Label>
+                <PropertyName>AllowAnonymous</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Roles</Label>
+                <ScriptBlock>($_.Roles -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Policies</Label>
+                <ScriptBlock>($_.Policies -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Return Type</Label>
+                <PropertyName>ReturnType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Is Async</Label>
+                <PropertyName>IsAsync</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Parameters</Label>
+                <ScriptBlock>($_.Parameters | ForEach-Object { $_.ToString() }) -join '; '</ScriptBlock>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+
     <!-- SecurityIssue Table View -->
     <View>
       <Name>Spy.Core.Contracts.SecurityIssue</Name>
