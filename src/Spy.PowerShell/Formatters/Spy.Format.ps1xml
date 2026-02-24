@@ -259,6 +259,136 @@
       </ListControl>
     </View>
 
+    <!-- WcfOperation Table View -->
+    <View>
+      <Name>Spy.Core.Contracts.WcfOperation</Name>
+      <ViewSelectedBy>
+        <TypeName>Spy.Core.Contracts.WcfOperation</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Contract</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Method</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Class</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>OneWay</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Auth</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>'WCF'</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ContractName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>MethodName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ClassName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.IsOneWay) { 'Yes' } else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.RequiresAuthorization) { 'Yes' }
+                  elseif ($_.AllowAnonymous) { 'Anon' }
+                  else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+    <!-- WcfOperation List View -->
+    <View>
+      <Name>Spy.Core.Contracts.WcfOperation.List</Name>
+      <ViewSelectedBy>
+        <TypeName>Spy.Core.Contracts.WcfOperation</TypeName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>Contract</Label>
+                <PropertyName>ContractName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Method</Label>
+                <PropertyName>MethodName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Class</Label>
+                <PropertyName>ClassName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Namespace</Label>
+                <PropertyName>ServiceNamespace</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>One-Way</Label>
+                <PropertyName>IsOneWay</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Requires Auth</Label>
+                <PropertyName>RequiresAuthorization</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Allow Anonymous</Label>
+                <PropertyName>AllowAnonymous</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Roles</Label>
+                <ScriptBlock>($_.Roles -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Policies</Label>
+                <ScriptBlock>($_.Policies -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Return Type</Label>
+                <PropertyName>ReturnType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Is Async</Label>
+                <PropertyName>IsAsync</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Parameters</Label>
+                <ScriptBlock>($_.Parameters | ForEach-Object { $_.ToString() }) -join '; '</ScriptBlock>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+
     <!-- SecurityIssue Table View -->
     <View>
       <Name>Spy.Core.Contracts.SecurityIssue</Name>

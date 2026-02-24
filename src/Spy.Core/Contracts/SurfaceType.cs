@@ -8,6 +8,8 @@ namespace Spy.Core.Contracts
         /// <summary>An HTTP endpoint on an ASP.NET Core / Web API controller.</summary>
         HttpEndpoint,
         /// <summary>A callable method on a SignalR hub.</summary>
-        SignalRMethod
+        SignalRMethod,
+        /// <summary>An operation on a WCF service contract.</summary>
+        WcfOperation
     }
 }

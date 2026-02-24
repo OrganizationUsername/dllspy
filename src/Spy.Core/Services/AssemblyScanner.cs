@@ -159,6 +159,9 @@ namespace Spy.Core.Services
                     case SignalRMethod signalr:
                         issues.AddRange(AnalyzeSignalRMethod(signalr));
                         break;
+                    case WcfOperation wcf:
+                        issues.AddRange(AnalyzeWcfOperation(wcf));
+                        break;
                 }
             }
 
@@ -260,6 +263,48 @@ namespace Spy.Core.Services
                     ClassName = method.ClassName,
                     MethodName = method.MethodName,
                     Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
+                });
+            }
+
+            return issues;
+        }
+
+        private static List<SecurityIssue> AnalyzeWcfOperation(WcfOperation operation)
+        {
+            var issues = new List<SecurityIssue>();
+
+            // HIGH: Unauthenticated WCF operation (direct invocation surface)
+            if (!operation.RequiresAuthorization && !operation.AllowAnonymous)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Unauthenticated WCF operation",
+                    Description = $"The WCF operation '{operation.ContractName}/{operation.MethodName}' on {operation.ClassName} " +
+                                  $"does not require authentication. WCF operations are directly invocable by clients.",
+                    Severity = SecuritySeverity.High,
+                    SurfaceRoute = operation.DisplayRoute,
+                    SurfaceType = SurfaceType.WcfOperation,
+                    ClassName = operation.ClassName,
+                    MethodName = operation.MethodName,
+                    Recommendation = $"Add [PrincipalPermission] attribute to the {operation.ClassName} class or its methods."
+                });
+            }
+
+            // LOW: [PrincipalPermission] / [Authorize] without roles or policies
+            if (operation.RequiresAuthorization && !operation.AllowAnonymous &&
+                operation.Roles.Count == 0 && operation.Policies.Count == 0)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Authorize without role or policy restriction",
+                    Description = $"The WCF operation '{operation.ContractName}/{operation.MethodName}' on {operation.ClassName} " +
+                                  $"requires authentication but does not specify roles or policies. Any authenticated user can invoke it.",
+                    Severity = SecuritySeverity.Low,
+                    SurfaceRoute = operation.DisplayRoute,
+                    SurfaceType = SurfaceType.WcfOperation,
+                    ClassName = operation.ClassName,
+                    MethodName = operation.MethodName,
+                    Recommendation = "Consider adding Role to the [PrincipalPermission] attribute to restrict access."
                 });
             }
 

@@ -34,7 +34,8 @@ namespace Spy.Core.Services
         /// <inheritdoc />
         public bool HasAuthorizeAttribute(MemberInfo member)
         {
-            return HasAttributeByName(member, "AuthorizeAttribute");
+            return HasAttributeByName(member, "AuthorizeAttribute")
+                || HasAttributeByName(member, "PrincipalPermissionAttribute");
         }
 
         /// <inheritdoc />
@@ -64,6 +65,15 @@ namespace Spy.Core.Services
                     };
                     result.Add(secAttr);
                 }
+                else if (attrName == "PrincipalPermissionAttribute")
+                {
+                    var secAttr = new SecurityAttribute
+                    {
+                        AttributeName = attrName,
+                        Roles = ExtractStringProperty(attr, "Role")
+                    };
+                    result.Add(secAttr);
+                }
                 else if (attrName == "AllowAnonymousAttribute")
                 {
                     result.Add(new SecurityAttribute { AttributeName = attrName });
@@ -80,8 +90,15 @@ namespace Spy.Core.Services
 
             foreach (var attr in GetCustomAttributesSafe(member))
             {
-                if (attr.GetType().Name != "AuthorizeAttribute") continue;
-                roles.AddRange(ExtractStringProperty(attr, "Roles"));
+                var attrName = attr.GetType().Name;
+                if (attrName == "AuthorizeAttribute")
+                {
+                    roles.AddRange(ExtractStringProperty(attr, "Roles"));
+                }
+                else if (attrName == "PrincipalPermissionAttribute")
+                {
+                    roles.AddRange(ExtractStringProperty(attr, "Role"));
+                }
             }
 
             return roles;

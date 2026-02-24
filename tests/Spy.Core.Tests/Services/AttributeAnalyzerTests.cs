@@ -152,5 +152,26 @@ namespace Spy.Core.Tests.Services
             var param = typeof(PlainController).GetMethod("Details").GetParameters()[0];
             Assert.Equal(ParameterSource.Unknown, _analyzer.GetParameterSource(param));
         }
+
+        [Fact]
+        public void HasAuthorizeAttribute_DetectsPrincipalPermission()
+        {
+            Assert.True(_analyzer.HasAuthorizeAttribute(typeof(SecureService)));
+        }
+
+        [Fact]
+        public void GetRoles_ExtractsRoleFromPrincipalPermission()
+        {
+            var method = typeof(SecureService).GetMethod("UpdateConfig");
+            var roles = _analyzer.GetRoles(method);
+            Assert.Contains("Admin", roles);
+        }
+
+        [Fact]
+        public void GetSecurityAttributes_IncludesPrincipalPermission()
+        {
+            var attrs = _analyzer.GetSecurityAttributes(typeof(SecureService));
+            Assert.Contains(attrs, a => a.AttributeName == "PrincipalPermissionAttribute");
+        }
     }
 }

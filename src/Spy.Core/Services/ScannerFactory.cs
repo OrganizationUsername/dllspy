@@ -13,7 +13,8 @@ namespace Spy.Core.Services
             var analyzer = new AttributeAnalyzer();
             return new AssemblyScanner(
                 new HttpEndpointDiscovery(analyzer),
-                new SignalRDiscovery(analyzer));
+                new SignalRDiscovery(analyzer),
+                new WcfDiscovery(analyzer));
         }
     }
 }

@@ -20,17 +20,18 @@ namespace Spy.Core.Tests.Services
         }
 
         [Fact]
-        public void ScanAssembly_ReturnsBothHttpAndSignalRSurfaces()
+        public void ScanAssembly_ReturnsAllSurfaceTypes()
         {
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.HttpEndpoint);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.SignalRMethod);
+            Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.WcfOperation);
         }
 
         [Fact]
         public void TotalSurfaces_IsCorrect()
         {
-            // 12 HTTP + 5 SignalR = 17
-            Assert.Equal(17, _report.TotalSurfaces);
+            // 12 HTTP + 5 SignalR + 6 WCF = 23
+            Assert.Equal(23, _report.TotalSurfaces);
         }
 
         [Fact]
@@ -48,22 +49,22 @@ namespace Spy.Core.Tests.Services
         [Fact]
         public void TotalClasses_IsCorrect()
         {
-            // Users, Admin, Public, Plain, ChatHub, NotificationHub, LifecycleHub
-            Assert.Equal(7, _report.TotalClasses);
+            // Users, Admin, Public, Plain, ChatHub, NotificationHub, LifecycleHub, OrderService, SecureService, IAuditService
+            Assert.Equal(10, _report.TotalClasses);
         }
 
         [Fact]
         public void AuthenticatedSurfaces_CountIsCorrect()
         {
-            // Update, Delete, GetDashboard, CreateSetting, Subscribe, Broadcast
-            Assert.Equal(6, _report.AuthenticatedSurfaces);
+            // Update, Delete, GetDashboard, CreateSetting, Subscribe, Broadcast, GetStatus, UpdateConfig
+            Assert.Equal(8, _report.AuthenticatedSurfaces);
         }
 
         [Fact]
         public void AnonymousSurfaces_CountIsCorrect()
         {
-            // AllowAnonymous or !RequiresAuthorization = 11
-            Assert.Equal(11, _report.AnonymousSurfaces);
+            // AllowAnonymous or !RequiresAuthorization = 15
+            Assert.Equal(15, _report.AnonymousSurfaces);
         }
 
         [Fact]
@@ -72,7 +73,8 @@ namespace Spy.Core.Tests.Services
             var highIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.High).ToList();
             // HTTP: UsersController.Create (POST), PublicController.Submit (POST)
             // SignalR: ChatHub.SendMessage, ChatHub.JoinRoom, LifecycleHub.SendPing
-            Assert.Equal(5, highIssues.Count);
+            // WCF: IOrderService.GetOrder, IOrderService.PlaceOrder, IOrderService.NotifyShipped, IAuditService.LogEvent
+            Assert.Equal(9, highIssues.Count);
         }
 
         [Fact]
@@ -87,14 +89,20 @@ namespace Spy.Core.Tests.Services
         public void LowSeverityIssues_ForAuthWithoutRoles()
         {
             var lowIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.Low).ToList();
-            // UsersController.Update, NotificationHub.Subscribe
-            Assert.Equal(2, lowIssues.Count);
+            // UsersController.Update, NotificationHub.Subscribe, SecureService.GetStatus
+            Assert.Equal(3, lowIssues.Count);
         }
 
         [Fact]
         public void TotalSecurityIssues_IsCorrect()
         {
-            Assert.Equal(11, _report.TotalSecurityIssues);
+            Assert.Equal(16, _report.TotalSecurityIssues);
+        }
+
+        [Fact]
+        public void TotalWcfOperations_IsCorrect()
+        {
+            Assert.Equal(6, _report.TotalWcfOperations);
         }
 
         [Fact]

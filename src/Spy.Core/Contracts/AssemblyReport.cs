@@ -33,6 +33,9 @@ namespace Spy.Core.Contracts
         /// <summary>Gets the number of SignalR methods discovered.</summary>
         public int TotalSignalRMethods => Surfaces.Count(s => s.SurfaceType == SurfaceType.SignalRMethod);
 
+        /// <summary>Gets the number of WCF operations discovered.</summary>
+        public int TotalWcfOperations => Surfaces.Count(s => s.SurfaceType == SurfaceType.WcfOperation);
+
         /// <summary>Gets the number of distinct classes found.</summary>
         public int TotalClasses => Surfaces.Select(s => s.ClassName).Distinct().Count();
 
