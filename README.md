@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/n7on/dllspy/actions/workflows/ci.yml/badge.svg)](https://github.com/n7on/dllspy/actions/workflows/ci.yml) [![NuGet Version](https://img.shields.io/nuget/v/DllSpy)](https://www.nuget.org/packages/DllSpy) [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/DllSpy)](https://www.powershellgallery.com/packages/DllSpy) [![License](https://img.shields.io/github/license/n7on/dllspy)](https://github.com/n7on/dllspy/blob/main/LICENSE)
 
-Scans compiled .NET assemblies to discover input surfaces (HTTP endpoints, SignalR hubs, WCF services, gRPC services), check authorization configuration, and flag security issues — all without running the application.
+Scans compiled .NET assemblies to discover input surfaces (HTTP endpoints, SignalR hubs, WCF services, gRPC services, Razor Pages, Blazor components), check authorization configuration, and flag security issues — all without running the application.
 
 Available as a **CLI tool** and a **PowerShell module**.
 
@@ -31,7 +31,7 @@ dllspy ./MyApi.dll
 # Scan for security vulnerabilities
 dllspy ./MyApi.dll -s
 
-# Filter by surface type
+# Filter by surface type (HttpEndpoint, SignalRMethod, WcfOperation, GrpcOperation, RazorPage, BlazorComponent)
 dllspy ./MyApi.dll -t HttpEndpoint
 
 # Filter by HTTP method and class name
@@ -59,6 +59,8 @@ Search-DllSpy -Path .\MyApi.dll -Type HttpEndpoint
 Search-DllSpy -Path .\MyApi.dll -Type SignalRMethod
 Search-DllSpy -Path .\MyApi.dll -Type WcfOperation
 Search-DllSpy -Path .\MyApi.dll -Type GrpcOperation
+Search-DllSpy -Path .\MyApi.dll -Type RazorPage
+Search-DllSpy -Path .\MyApi.dll -Type BlazorComponent
 
 # Filter by HTTP method
 Search-DllSpy -Path .\MyApi.dll -HttpMethod DELETE
@@ -88,6 +90,8 @@ Test-DllSpy -Path .\MyApi.dll | Format-List
 | **SignalR** | `Hub` / `Hub<T>` inheritance | `SignalRMethod` |
 | **WCF** | `[ServiceContract]` interfaces + `[OperationContract]` methods | `WcfOperation` |
 | **gRPC** | Generated base class with `BindService` | `GrpcOperation` |
+| **Razor Pages** | `PageModel` inheritance, `On{Verb}[Handler][Async]` methods | `RazorPage` |
+| **Blazor** | `ComponentBase` inheritance + `[Route]` attribute | `BlazorComponent` |
 
 ## Security Rules
 
@@ -118,6 +122,21 @@ Test-DllSpy -Path .\MyApi.dll | Format-List
 | Severity | Rule | Description |
 |----------|------|-------------|
 | **High** | Unauthenticated gRPC operation | Service method without `[Authorize]` |
+| **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
+
+### Razor Page Handlers
+
+| Severity | Rule | Description |
+|----------|------|-------------|
+| **High** | Unauthenticated state-changing handler | `POST`, `PUT`, `DELETE`, or `PATCH` handler without `[Authorize]` |
+| **Medium** | Missing authorization declaration | Handler has neither `[Authorize]` nor `[AllowAnonymous]` |
+| **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
+
+### Blazor Routable Components
+
+| Severity | Rule | Description |
+|----------|------|-------------|
+| **High** | Unauthenticated routable component | Component with `[Route]` but without `[Authorize]` |
 | **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
 
 ## License

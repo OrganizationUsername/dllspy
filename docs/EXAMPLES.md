@@ -128,6 +128,26 @@ Search-DllSpy -Path .\MyApi.dll -Type SignalRMethod |
     Format-Table HubName, MethodName, HubRoute
 ```
 
+## Audit Razor Pages
+
+Find all unauthenticated POST handlers on Razor Pages:
+
+```powershell
+Search-DllSpy -Path .\MyApp.dll -Type RazorPage |
+    Where-Object { $_.HttpMethod -eq 'POST' -and -not $_.RequiresAuthorization } |
+    Format-Table PageRoute, HandlerName, PageModelName
+```
+
+## Audit Blazor Components
+
+Find all unauthenticated routable Blazor components:
+
+```powershell
+Search-DllSpy -Path .\MyApp.dll -Type BlazorComponent |
+    Where-Object { -not $_.RequiresAuthorization } |
+    Format-Table RouteTemplate, ComponentName
+```
+
 ## Interactive Exploration with Format-List
 
 Get full details on a specific HTTP endpoint:

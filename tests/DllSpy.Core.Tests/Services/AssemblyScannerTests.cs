@@ -26,13 +26,15 @@ namespace DllSpy.Core.Tests.Services
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.SignalRMethod);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.WcfOperation);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.GrpcOperation);
+            Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.RazorPage);
+            Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.BlazorComponent);
         }
 
         [Fact]
         public void TotalSurfaces_IsCorrect()
         {
-            // 12 HTTP + 5 SignalR + 6 WCF + 6 gRPC = 29
-            Assert.Equal(29, _report.TotalSurfaces);
+            // 12 HTTP + 5 SignalR + 6 WCF + 6 gRPC + 11 Razor + 6 Blazor = 46
+            Assert.Equal(46, _report.TotalSurfaces);
         }
 
         [Fact]
@@ -51,7 +53,9 @@ namespace DllSpy.Core.Tests.Services
         public void TotalClasses_IsCorrect()
         {
             // Users, Admin, Public, Plain, ChatHub, NotificationHub, LifecycleHub, OrderService, SecureService, IAuditService, GreeterService, OrderGrpcService
-            Assert.Equal(12, _report.TotalClasses);
+            // + IndexModel, ContactModel, DetailsModel, EditModel, DashboardModel, LoginModel
+            // + Counter, WeatherForecast, AdminSettings, UserProfile, PublicInfo
+            Assert.Equal(23, _report.TotalClasses);
         }
 
         [Fact]
@@ -59,14 +63,16 @@ namespace DllSpy.Core.Tests.Services
         {
             // Update, Delete, GetDashboard, CreateSetting, Subscribe, Broadcast, GetStatus, UpdateConfig,
             // gRPC: OrderGrpcService.GetOrder, PlaceOrder, StreamOrders, Chat
-            Assert.Equal(12, _report.AuthenticatedSurfaces);
+            // Razor: DashboardModel.OnGet, DashboardModel.OnPostExportAsync, LoginModel.OnPostAsync
+            // Blazor: AdminSettings, UserProfile
+            Assert.Equal(17, _report.AuthenticatedSurfaces);
         }
 
         [Fact]
         public void AnonymousSurfaces_CountIsCorrect()
         {
-            // AllowAnonymous or !RequiresAuthorization = 17
-            Assert.Equal(17, _report.AnonymousSurfaces);
+            // AllowAnonymous or !RequiresAuthorization = 29
+            Assert.Equal(29, _report.AnonymousSurfaces);
         }
 
         [Fact]
@@ -77,7 +83,9 @@ namespace DllSpy.Core.Tests.Services
             // SignalR: ChatHub.SendMessage, ChatHub.JoinRoom, LifecycleHub.SendPing
             // WCF: IOrderService.GetOrder, IOrderService.PlaceOrder, IOrderService.NotifyShipped, IAuditService.LogEvent
             // gRPC: GreeterService.SayHello, GreeterService.SayHellos
-            Assert.Equal(11, highIssues.Count);
+            // Razor: ContactModel.OnPostAsync, EditModel.OnPostAsync, EditModel.OnPostDeleteAsync
+            // Blazor: Counter, WeatherForecast(/weather), WeatherForecast(/forecast)
+            Assert.Equal(17, highIssues.Count);
         }
 
         [Fact]
@@ -85,7 +93,8 @@ namespace DllSpy.Core.Tests.Services
         {
             var mediumIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.Medium).ToList();
             // UsersController.GetAll, UsersController.GetById, PlainController.Index, PlainController.Details
-            Assert.Equal(4, mediumIssues.Count);
+            // Razor: IndexModel.OnGet, ContactModel.OnGet, DetailsModel.OnGet, EditModel.OnGet
+            Assert.Equal(8, mediumIssues.Count);
         }
 
         [Fact]
@@ -94,13 +103,16 @@ namespace DllSpy.Core.Tests.Services
             var lowIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.Low).ToList();
             // UsersController.Update, NotificationHub.Subscribe, SecureService.GetStatus,
             // gRPC: OrderGrpcService.GetOrder, OrderGrpcService.StreamOrders, OrderGrpcService.Chat
-            Assert.Equal(6, lowIssues.Count);
+            // Razor: LoginModel.OnPostAsync
+            // Blazor: UserProfile
+            Assert.Equal(8, lowIssues.Count);
         }
 
         [Fact]
         public void TotalSecurityIssues_IsCorrect()
         {
-            Assert.Equal(21, _report.TotalSecurityIssues);
+            // 17 HIGH + 8 MEDIUM + 8 LOW = 33
+            Assert.Equal(33, _report.TotalSecurityIssues);
         }
 
         [Fact]

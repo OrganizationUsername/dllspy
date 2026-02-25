@@ -39,6 +39,12 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets the number of gRPC operations discovered.</summary>
         public int TotalGrpcOperations => Surfaces.Count(s => s.SurfaceType == SurfaceType.GrpcOperation);
 
+        /// <summary>Gets the number of Razor Page handlers discovered.</summary>
+        public int TotalRazorPageHandlers => Surfaces.Count(s => s.SurfaceType == SurfaceType.RazorPage);
+
+        /// <summary>Gets the number of Blazor routes discovered.</summary>
+        public int TotalBlazorRoutes => Surfaces.Count(s => s.SurfaceType == SurfaceType.BlazorComponent);
+
         /// <summary>Gets the number of distinct classes found.</summary>
         public int TotalClasses => Surfaces.Select(s => s.ClassName).Distinct().Count();
 

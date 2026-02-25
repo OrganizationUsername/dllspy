@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.2.2] - 2026-02-25
+
+### Added
+- **Razor Page handler discovery** — detects `PageModel` subclasses, parses `On{Verb}[Handler][Async]` methods, infers routes from namespace segments after `Pages`, scans `[BindProperty]` properties as parameters
+- **Blazor routable component discovery** — detects `ComponentBase` subclasses with `[Route]` attributes, extracts `[Parameter]` properties, creates one surface per route (supports multi-route components)
+- `RazorPageHandler` surface type with `PageRoute`, `HttpMethod`, `HandlerName`, `PageModelName` properties
+- `BlazorRoute` surface type with `RouteTemplate`, `ComponentName` properties
+- `RazorPage` and `BlazorComponent` values added to `SurfaceType` enum
+- Razor Page security rules: unauthenticated state-changing handler (High), missing auth declaration (Medium), authorize without role/policy (Low)
+- Blazor security rules: unauthenticated routable component (High), authorize without role/policy (Low)
+- `TotalRazorPageHandlers` and `TotalBlazorRoutes` computed properties on `AssemblyReport`
+- CLI type labels: `Razor` and `Blazor` in surface output tables
+
 ## [0.2.1] - 2026-02-25
 
 ### Added

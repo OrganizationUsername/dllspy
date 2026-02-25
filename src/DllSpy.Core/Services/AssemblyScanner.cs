@@ -165,6 +165,12 @@ namespace DllSpy.Core.Services
                     case GrpcOperation grpc:
                         issues.AddRange(AnalyzeGrpcOperation(grpc));
                         break;
+                    case RazorPageHandler razor:
+                        issues.AddRange(AnalyzeRazorPageHandler(razor));
+                        break;
+                    case BlazorRoute blazor:
+                        issues.AddRange(AnalyzeBlazorRoute(blazor));
+                        break;
                 }
             }
 
@@ -349,6 +355,107 @@ namespace DllSpy.Core.Services
                     SurfaceType = SurfaceType.GrpcOperation,
                     ClassName = operation.ClassName,
                     MethodName = operation.MethodName,
+                    Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
+                });
+            }
+
+            return issues;
+        }
+
+        private static List<SecurityIssue> AnalyzeRazorPageHandler(RazorPageHandler handler)
+        {
+            var issues = new List<SecurityIssue>();
+
+            // HIGH: State-changing handlers (POST, PUT, DELETE, PATCH) without [Authorize]
+            if (IsStateChangingMethod(handler.HttpMethod) && !handler.RequiresAuthorization && !handler.AllowAnonymous)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = $"Unauthenticated {handler.HttpMethod} Razor Page handler",
+                    Description = $"The {handler.HttpMethod} handler '{handler.DisplayRoute}' on {handler.PageModelName} " +
+                                  $"does not require authentication. State-changing operations should be protected.",
+                    Severity = SecuritySeverity.High,
+                    SurfaceRoute = handler.DisplayRoute,
+                    SurfaceType = SurfaceType.RazorPage,
+                    ClassName = handler.ClassName,
+                    MethodName = handler.MethodName,
+                    Recommendation = $"Add [Authorize] attribute to the {handler.PageModelName} class or the handler method."
+                });
+            }
+
+            // MEDIUM: Handlers without [Authorize] or [AllowAnonymous] (unclear intent)
+            if (!handler.RequiresAuthorization && !handler.AllowAnonymous && !IsStateChangingMethod(handler.HttpMethod))
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Missing authorization declaration",
+                    Description = $"The Razor Page handler '{handler.DisplayRoute}' on {handler.PageModelName} " +
+                                  $"has neither [Authorize] nor [AllowAnonymous]. Security intent is unclear.",
+                    Severity = SecuritySeverity.Medium,
+                    SurfaceRoute = handler.DisplayRoute,
+                    SurfaceType = SurfaceType.RazorPage,
+                    ClassName = handler.ClassName,
+                    MethodName = handler.MethodName,
+                    Recommendation = "Add [Authorize] or [AllowAnonymous] to explicitly declare the security intent."
+                });
+            }
+
+            // LOW: [Authorize] without roles or policies (broad access)
+            if (handler.RequiresAuthorization && !handler.AllowAnonymous &&
+                handler.Roles.Count == 0 && handler.Policies.Count == 0)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Authorize without role or policy restriction",
+                    Description = $"The Razor Page handler '{handler.DisplayRoute}' on {handler.PageModelName} " +
+                                  $"requires authentication but does not specify roles or policies. Any authenticated user can access it.",
+                    Severity = SecuritySeverity.Low,
+                    SurfaceRoute = handler.DisplayRoute,
+                    SurfaceType = SurfaceType.RazorPage,
+                    ClassName = handler.ClassName,
+                    MethodName = handler.MethodName,
+                    Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
+                });
+            }
+
+            return issues;
+        }
+
+        private static List<SecurityIssue> AnalyzeBlazorRoute(BlazorRoute route)
+        {
+            var issues = new List<SecurityIssue>();
+
+            // HIGH: Unauthenticated routable component (direct navigation surface)
+            if (!route.RequiresAuthorization && !route.AllowAnonymous)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Unauthenticated Blazor routable component",
+                    Description = $"The Blazor component '{route.ComponentName}' at '{route.RouteTemplate}' " +
+                                  $"does not require authentication. Routable components are directly navigable by users.",
+                    Severity = SecuritySeverity.High,
+                    SurfaceRoute = route.DisplayRoute,
+                    SurfaceType = SurfaceType.BlazorComponent,
+                    ClassName = route.ClassName,
+                    MethodName = route.MethodName,
+                    Recommendation = $"Add [Authorize] attribute to the {route.ComponentName} component."
+                });
+            }
+
+            // LOW: [Authorize] without roles or policies
+            if (route.RequiresAuthorization && !route.AllowAnonymous &&
+                route.Roles.Count == 0 && route.Policies.Count == 0)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Authorize without role or policy restriction",
+                    Description = $"The Blazor component '{route.ComponentName}' at '{route.RouteTemplate}' " +
+                                  $"requires authentication but does not specify roles or policies. Any authenticated user can access it.",
+                    Severity = SecuritySeverity.Low,
+                    SurfaceRoute = route.DisplayRoute,
+                    SurfaceType = SurfaceType.BlazorComponent,
+                    ClassName = route.ClassName,
+                    MethodName = route.MethodName,
                     Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
                 });
             }

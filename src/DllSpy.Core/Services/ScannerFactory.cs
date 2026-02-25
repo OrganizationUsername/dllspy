@@ -15,7 +15,9 @@ namespace DllSpy.Core.Services
                 new HttpEndpointDiscovery(analyzer),
                 new SignalRDiscovery(analyzer),
                 new WcfDiscovery(analyzer),
-                new GrpcDiscovery(analyzer));
+                new GrpcDiscovery(analyzer),
+                new RazorPageDiscovery(analyzer),
+                new BlazorDiscovery(analyzer));
         }
     }
 }

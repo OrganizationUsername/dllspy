@@ -12,6 +12,10 @@ namespace DllSpy.Core.Contracts
         /// <summary>An operation on a WCF service contract.</summary>
         WcfOperation,
         /// <summary>An operation on a gRPC service.</summary>
-        GrpcOperation
+        GrpcOperation,
+        /// <summary>A handler on a Razor Page.</summary>
+        RazorPage,
+        /// <summary>A routable Blazor component.</summary>
+        BlazorComponent
     }
 }

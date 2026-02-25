@@ -2,12 +2,16 @@ using System;
 
 namespace DllSpy.Core.Tests.Fixtures
 {
-    // Base classes that match names Spy looks for via reflection
+    // Base classes that match names DllSpy looks for via reflection
     public class ControllerBase { }
 
     public class Hub { }
 
     public class Hub<T> { }
+
+    public class PageModel { }
+
+    public class ComponentBase { }
 
     // Security attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
@@ -25,7 +29,7 @@ namespace DllSpy.Core.Tests.Fixtures
     [AttributeUsage(AttributeTargets.Class)]
     public class ApiControllerAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
         public string Template { get; }
@@ -82,4 +86,11 @@ namespace DllSpy.Core.Tests.Fixtures
 
     [AttributeUsage(AttributeTargets.Parameter)]
     public class FromRouteAttribute : Attribute { }
+
+    // Property binding attributes
+    [AttributeUsage(AttributeTargets.Property)]
+    public class BindPropertyAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class ParameterAttribute : Attribute { }
 }

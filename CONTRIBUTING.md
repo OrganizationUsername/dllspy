@@ -47,7 +47,7 @@ dllspy/
 │   └── DllSpy.Cli/             # CLI tool (net8.0)
 ├── tests/
 │   └── DllSpy.Core.Tests/      # xUnit tests
-│       ├── Fixtures/            # Fake ASP.NET types and sample controllers/hubs
+│       ├── Fixtures/            # Fake ASP.NET/Razor/Blazor types and sample controllers/hubs/pages/components
 │       ├── Helpers/             # ReflectionHelper tests
 │       └── Services/            # Discovery, scanner, and analyzer tests
 ├── docs/                        # Documentation
@@ -63,9 +63,13 @@ DllSpy loads .NET assemblies via `System.Reflection` and scans for types that re
 
 **SignalR Hub Methods** — Classes inheriting from `Hub` or `Hub<T>`. Public instance methods are discovered, excluding lifecycle methods like `OnConnectedAsync`. Routes use conventional naming (strip "Hub" suffix) since actual `MapHub<T>("/route")` calls aren't discoverable via reflection.
 
+**Razor Page Handlers** — Classes inheriting from `PageModel`. Public methods matching the `On{Verb}[Handler][Async]` pattern are discovered (e.g. `OnPostDeleteAsync` → POST with handler name "Delete"). Page routes are inferred from namespace segments after `Pages` plus the class name minus the `Model` suffix. Properties with `[BindProperty]` are included as form parameters.
+
+**Blazor Routable Components** — Classes inheriting from `ComponentBase` that have one or more `[Route]` attributes. Each route template produces a separate surface. Properties with `[Parameter]` are included as parameters. Non-routable components (no `[Route]`) are excluded.
+
 ## Adding a New Discovery Type
 
-To add a new surface type (e.g. gRPC, minimal APIs):
+To add a new surface type (e.g. minimal APIs):
 
 1. Add the type to `SurfaceType` enum in `src/DllSpy.Core/Contracts/SurfaceType.cs`
 2. Create a new class extending `InputSurface` in `src/DllSpy.Core/Contracts/`
