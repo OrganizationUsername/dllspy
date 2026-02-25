@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-25
+
+### Added
+- **CLI tool** (`DllSpy.Cli`) — standalone `dotnet tool` for scanning assemblies from the command line
+
+### Changed
+- Renamed solution and all projects from `Spy` to `DllSpy` (`DllSpy.Core`, `DllSpy.PowerShell`, `DllSpy.Core.Tests`)
+- Renamed namespaces from `Spy.*` to `DllSpy.*`
+
 ## [0.2.0] - 2026-02-24
 
 ### Added
