@@ -83,7 +83,7 @@ jobs:
 
       - name: Publish to NuGet
         shell: pwsh
-        run: dotnet nuget push (Get-ChildItem nupkg/*.nupkg).FullName --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push (Get-ChildItem nupkg/*.nupkg).FullName --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Publish to PowerShell Gallery
         shell: pwsh
