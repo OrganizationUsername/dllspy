@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+## [0.2.3] - 2026-02-26
+
+### Added
+- `--output`/`-o` option on CLI with `table`, `tsv`, `json` formats (auto-detects: table for TTY, tsv for piped)
+- Table output truncates columns to fit terminal width
+
+### Changed
+- `--json` flag replaced by `--output json` / `-o json`
+
 ## [0.2.2] - 2026-02-25
 
 ### Added

@@ -44,8 +44,9 @@ dllspy ./MyApi.dll --anon
 # Scan with minimum severity
 dllspy ./MyApi.dll -s --min-severity High
 
-# JSON output
-dllspy ./MyApi.dll --json
+# Output format: table (default), tsv, json
+dllspy ./MyApi.dll -o json
+dllspy ./MyApi.dll -o tsv
 ```
 
 ### PowerShell

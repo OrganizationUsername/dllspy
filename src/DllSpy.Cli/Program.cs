@@ -19,11 +19,11 @@ namespace DllSpy.Cli
             var auth = new Option<bool>("--auth") { Description = "Only show surfaces requiring authorization" };
             var anon = new Option<bool>("--anon") { Description = "Only show surfaces allowing anonymous access" };
             var minSev = new Option<SecuritySeverity>("--min-severity") { Description = "Minimum severity for scan mode", DefaultValueFactory = _ => SecuritySeverity.Info };
-            var json = new Option<bool>("--json") { Description = "Output as JSON" };
+            var output = new Option<OutputFormat?>("--output", "-o") { Description = "Output format: table, tsv, json (default: table for TTY, tsv for piped)" };
 
             var root = new RootCommand("Discover input surfaces and security issues in .NET assemblies")
             {
-                path, scan, type, method, cls, auth, anon, minSev, json
+                path, scan, type, method, cls, auth, anon, minSev, output
             };
 
             root.SetAction(r =>
@@ -32,10 +32,12 @@ namespace DllSpy.Cli
                 {
                     var report = ScannerFactory.Create().ScanAssembly(r.GetValue(path));
 
+                    var fmt = r.GetValue(output);
+
                     return r.GetValue(scan)
-                        ? RunScan(report, r.GetValue(type), r.GetValue(minSev), r.GetValue(json))
+                        ? RunScan(report, r.GetValue(type), r.GetValue(minSev), fmt)
                         : RunList(report, r.GetValue(type), r.GetValue(method), r.GetValue(cls),
-                            r.GetValue(auth), r.GetValue(anon), r.GetValue(json));
+                            r.GetValue(auth), r.GetValue(anon), fmt);
                 }
                 catch (Exception ex)
                 {
@@ -72,7 +74,7 @@ namespace DllSpy.Cli
         }
 
         private static int RunList(AssemblyReport report, SurfaceType? typeFilter,
-            string methodFilter, string classFilter, bool authOnly, bool anonOnly, bool json)
+            string methodFilter, string classFilter, bool authOnly, bool anonOnly, OutputFormat? format)
         {
             var surfaces = report.Surfaces.AsEnumerable();
 
@@ -96,12 +98,12 @@ namespace DllSpy.Cli
             if (anonOnly)
                 surfaces = surfaces.Where(s => s.AllowAnonymous);
 
-            OutputWriter.PrintSurfaces(surfaces.ToList(), json);
+            OutputWriter.PrintSurfaces(surfaces.ToList(), format);
             return 0;
         }
 
         private static int RunScan(AssemblyReport report, SurfaceType? typeFilter,
-            SecuritySeverity minSeverity, bool json)
+            SecuritySeverity minSeverity, OutputFormat? format)
         {
             var issues = report.SecurityIssues.AsEnumerable();
 
@@ -111,7 +113,7 @@ namespace DllSpy.Cli
             issues = issues.Where(i => i.Severity >= minSeverity);
             var list = issues.OrderByDescending(i => i.Severity).ToList();
 
-            OutputWriter.PrintIssues(list, json);
+            OutputWriter.PrintIssues(list, format);
 
             var highCount = list.Count(i => i.Severity >= SecuritySeverity.High);
             if (highCount > 0)
