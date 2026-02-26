@@ -2,6 +2,100 @@
 <Configuration>
   <ViewDefinitions>
 
+    <!-- InputSurface Table View (unified, used for mixed types) -->
+    <View>
+      <Name>DllSpy.Core.Contracts.InputSurface</Name>
+      <ViewSelectedBy>
+        <TypeName>DllSpy.Core.Contracts.HttpEndpoint</TypeName>
+        <TypeName>DllSpy.Core.Contracts.SignalRMethod</TypeName>
+        <TypeName>DllSpy.Core.Contracts.WcfOperation</TypeName>
+        <TypeName>DllSpy.Core.Contracts.GrpcOperation</TypeName>
+        <TypeName>DllSpy.Core.Contracts.RazorPageHandler</TypeName>
+        <TypeName>DllSpy.Core.Contracts.BlazorRoute</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Method</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Route</Label>
+            <Width>40</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Class</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Action</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Auth</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>
+                  switch ($_.SurfaceType.ToString()) {
+                    'HttpEndpoint'    { 'HTTP' }
+                    'SignalRMethod'   { 'SignalR' }
+                    'WcfOperation'    { 'WCF' }
+                    'GrpcOperation'   { 'gRPC' }
+                    'RazorPage'       { 'Razor' }
+                    'BlazorComponent' { 'Blazor' }
+                    default           { $_.SurfaceType }
+                  }
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_ -is [DllSpy.Core.Contracts.HttpEndpoint]) { $_.HttpMethod }
+                  elseif ($_ -is [DllSpy.Core.Contracts.RazorPageHandler]) { $_.HttpMethod }
+                  else { '' }
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_ -is [DllSpy.Core.Contracts.HttpEndpoint]) { $_.Route }
+                  elseif ($_ -is [DllSpy.Core.Contracts.RazorPageHandler]) {
+                    if ($_.HandlerName) { "$($_.PageRoute)?handler=$($_.HandlerName)" }
+                    else { $_.PageRoute }
+                  }
+                  elseif ($_ -is [DllSpy.Core.Contracts.SignalRMethod]) { $_.HubRoute }
+                  elseif ($_ -is [DllSpy.Core.Contracts.WcfOperation]) { $_.ContractName }
+                  elseif ($_ -is [DllSpy.Core.Contracts.GrpcOperation]) { $_.ServiceName }
+                  elseif ($_ -is [DllSpy.Core.Contracts.BlazorRoute]) { $_.RouteTemplate }
+                  else { '' }
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ClassName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>MethodName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.RequiresAuthorization) { 'Yes' }
+                  elseif ($_.AllowAnonymous) { 'Anon' }
+                  else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
     <!-- HttpEndpoint Table View -->
     <View>
       <Name>DllSpy.Core.Contracts.HttpEndpoint</Name>
