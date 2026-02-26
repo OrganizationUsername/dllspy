@@ -4,7 +4,7 @@
     RootModule = 'DllSpy.PowerShell.dll'
 
     # Version number of this module.
-    ModuleVersion = '0.2.4'
+    ModuleVersion = '0.2.5'
 
     # ID used to uniquely identify this module
     GUID = 'f7e8a9b0-1c2d-3e4f-5a6b-7c8d9e0f1a2b'
@@ -64,7 +64,7 @@
             ProjectUri = 'https://github.com/n7on/dllspy'
 
             # Release notes for this module
-            ReleaseNotes = 'CLI now shows separate METHOD and ROUTE columns (renamed old METHOD to ACTION). Fixed PowerShell formatter TypeName mismatch so Format-Table uses custom views. Added Razor Page and Blazor formatter views.'
+            ReleaseNotes = 'Unified PowerShell Format-Table view for mixed surface types. CLI shows separate METHOD and ROUTE columns. Fixed formatter TypeName namespace mismatch. Added Razor Page and Blazor formatter views.'
         }
     }
 

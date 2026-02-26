@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.2.5] - 2026-02-26
+
+### Added
+- Unified `InputSurface` PowerShell formatter view so mixed surface types render consistently with `Format-Table` (`Type | Method | Route | Class | Action | Auth`)
+- Demo GIF in README
+
 ## [0.2.4] - 2026-02-26
 
 ### Changed
