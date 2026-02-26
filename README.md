@@ -6,7 +6,7 @@ Scans compiled .NET assemblies to discover input surfaces (HTTP endpoints, Signa
 
 Available as a **CLI tool** and a **PowerShell module**.
 
-![DllSpy demo](docs/dllspy.gif)
+![DllSpy demo](docs/demo.gif)
 
 ## Installation
 
@@ -49,6 +49,19 @@ dllspy ./MyApi.dll -s --min-severity High
 # Output format: table (default), tsv, json
 dllspy ./MyApi.dll -o json
 dllspy ./MyApi.dll -o tsv
+```
+
+### JSON + jq
+
+```bash
+# List all unprotected routes
+dllspy ./MyApi.dll -o json | jq '[.[] | select(.requiresAuthorization == false) | .displayRoute]'
+
+# Count surfaces by type
+dllspy ./MyApi.dll -o json | jq 'group_by(.surfaceType) | map({type: .[0].surfaceType, count: length})'
+
+# Security issues as compact table
+dllspy ./MyApi.dll -s -o json | jq -r '.[] | [.severity, .surfaceRoute, .title] | @tsv'
 ```
 
 ### PowerShell
