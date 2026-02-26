@@ -87,34 +87,90 @@ namespace DllSpy.Core.Services
 
             try
             {
-                // Locate .NET shared framework directories from the current runtime.
-                // typeof(object).Assembly.Location points to e.g.:
-                //   .../shared/Microsoft.NETCore.App/8.0.x/System.Private.CoreLib.dll
-                // Navigate up to the shared/ folder to discover sibling frameworks
-                // like Microsoft.AspNetCore.App.
-                var coreLib = typeof(object).Assembly.Location;
-                if (!string.IsNullOrEmpty(coreLib))
+                var sharedDir = FindSharedFrameworkDir();
+                if (sharedDir != null)
                 {
-                    var runtimeDir = Path.GetDirectoryName(coreLib);
-                    var frameworkBase = runtimeDir != null ? Path.GetDirectoryName(runtimeDir) : null;
-                    var sharedDir = frameworkBase != null ? Path.GetDirectoryName(frameworkBase) : null;
-
-                    if (sharedDir != null && Directory.Exists(sharedDir))
+                    foreach (var framework in Directory.GetDirectories(sharedDir))
                     {
-                        foreach (var framework in Directory.GetDirectories(sharedDir))
+                        try
                         {
-                            try
-                            {
-                                paths.AddRange(Directory.GetDirectories(framework));
-                            }
-                            catch { /* skip inaccessible directories */ }
+                            paths.AddRange(Directory.GetDirectories(framework));
                         }
+                        catch { /* skip inaccessible directories */ }
                     }
                 }
             }
             catch { /* shared framework discovery is best-effort */ }
 
             return paths;
+        }
+
+        private static string FindSharedFrameworkDir()
+        {
+            // Strategy 1: Navigate from typeof(object).Assembly.Location
+            // e.g. .../shared/Microsoft.NETCore.App/8.0.x/System.Private.CoreLib.dll
+            var coreLib = typeof(object).Assembly.Location;
+            if (!string.IsNullOrEmpty(coreLib))
+            {
+                var result = NavigateToSharedDir(coreLib);
+                if (result != null) return result;
+            }
+
+            // Strategy 2: RuntimeEnvironment.GetRuntimeDirectory()
+            // Works even in single-file hosts (e.g. PowerShell 7 on macOS)
+            // where typeof(object).Assembly.Location is empty.
+            // Returns e.g. /usr/local/share/dotnet/shared/Microsoft.NETCore.App/8.0.x/
+            try
+            {
+                var runtimeDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+                if (!string.IsNullOrEmpty(runtimeDir))
+                {
+                    var result = NavigateToSharedDir(runtimeDir.TrimEnd(Path.DirectorySeparatorChar));
+                    if (result != null) return result;
+                }
+            }
+            catch { /* best-effort */ }
+
+            // Strategy 3: DOTNET_ROOT environment variable
+            var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+            if (!string.IsNullOrEmpty(dotnetRoot))
+            {
+                var shared = Path.Combine(dotnetRoot, "shared");
+                if (Directory.Exists(shared))
+                    return shared;
+            }
+
+            // Strategy 4: Well-known install locations
+            var candidates = new[]
+            {
+                "/usr/local/share/dotnet",
+                "/usr/share/dotnet",
+                "/opt/homebrew/share/dotnet",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet")
+            };
+
+            foreach (var candidate in candidates)
+            {
+                var shared = Path.Combine(candidate, "shared");
+                if (Directory.Exists(shared))
+                    return shared;
+            }
+
+            return null;
+        }
+
+        private static string NavigateToSharedDir(string pathInsideShared)
+        {
+            // Walk up from a path like .../shared/Microsoft.NETCore.App/8.0.x/Something
+            // looking for a directory named "shared" that contains framework subdirectories
+            var dir = Directory.Exists(pathInsideShared) ? pathInsideShared : Path.GetDirectoryName(pathInsideShared);
+            while (dir != null)
+            {
+                if (Path.GetFileName(dir) == "shared" && Directory.Exists(dir))
+                    return dir;
+                dir = Path.GetDirectoryName(dir);
+            }
+            return null;
         }
 
         /// <inheritdoc />

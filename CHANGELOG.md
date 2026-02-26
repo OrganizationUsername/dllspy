@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+## [0.2.6] - 2026-02-26
+
+### Fixed
+- Assembly resolution on macOS PowerShell 7 — `Search-DllSpy` returned 0 surfaces because single-file hosts report empty `Assembly.Location`, preventing shared framework discovery. Now uses `RuntimeEnvironment.GetRuntimeDirectory()` as fallback, plus well-known dotnet install paths (including `/opt/homebrew/share/dotnet` for Apple Silicon)
+
+### Added
+- Pester integration tests (`tests/PowerShell/DllSpy.Tests.ps1`)
+
 ## [0.2.5] - 2026-02-26
 
 ### Added
