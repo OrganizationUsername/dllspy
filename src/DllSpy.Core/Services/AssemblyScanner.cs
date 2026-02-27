@@ -230,6 +230,9 @@ namespace DllSpy.Core.Services
                     case AzureFunction func:
                         issues.AddRange(AnalyzeAzureFunction(func));
                         break;
+                    case ODataEndpoint odata:
+                        issues.AddRange(AnalyzeODataEndpoint(odata));
+                        break;
                 }
             }
 
@@ -558,6 +561,65 @@ namespace DllSpy.Core.Services
                     SurfaceType = SurfaceType.AzureFunction,
                     ClassName = func.ClassName,
                     MethodName = func.MethodName,
+                    Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
+                });
+            }
+
+            return issues;
+        }
+
+        private static List<SecurityIssue> AnalyzeODataEndpoint(ODataEndpoint endpoint)
+        {
+            var issues = new List<SecurityIssue>();
+
+            // HIGH: State-changing endpoints (DELETE, POST, PUT, PATCH) without [Authorize]
+            if (IsStateChangingMethod(endpoint.HttpMethod) && !endpoint.RequiresAuthorization && !endpoint.AllowAnonymous)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = $"Unauthenticated {endpoint.HttpMethod} OData endpoint",
+                    Description = $"The {endpoint.HttpMethod} OData endpoint '{endpoint.Route}' on {endpoint.ClassName}.{endpoint.MethodName} " +
+                                  $"does not require authentication. State-changing operations should be protected.",
+                    Severity = SecuritySeverity.High,
+                    SurfaceRoute = endpoint.DisplayRoute,
+                    SurfaceType = SurfaceType.ODataEndpoint,
+                    ClassName = endpoint.ClassName,
+                    MethodName = endpoint.MethodName,
+                    Recommendation = $"Add [Authorize] attribute to the {endpoint.MethodName} action or the {endpoint.ClassName} OData controller."
+                });
+            }
+
+            // MEDIUM: Endpoints without [Authorize] or [AllowAnonymous] (unclear intent)
+            if (!endpoint.RequiresAuthorization && !endpoint.AllowAnonymous && !IsStateChangingMethod(endpoint.HttpMethod))
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Missing authorization declaration",
+                    Description = $"The OData endpoint '{endpoint.Route}' on {endpoint.ClassName}.{endpoint.MethodName} " +
+                                  $"has neither [Authorize] nor [AllowAnonymous]. Security intent is unclear.",
+                    Severity = SecuritySeverity.Medium,
+                    SurfaceRoute = endpoint.DisplayRoute,
+                    SurfaceType = SurfaceType.ODataEndpoint,
+                    ClassName = endpoint.ClassName,
+                    MethodName = endpoint.MethodName,
+                    Recommendation = "Add [Authorize] or [AllowAnonymous] to explicitly declare the security intent."
+                });
+            }
+
+            // LOW: [Authorize] without roles or policies (broad access)
+            if (endpoint.RequiresAuthorization && !endpoint.AllowAnonymous &&
+                endpoint.Roles.Count == 0 && endpoint.Policies.Count == 0)
+            {
+                issues.Add(new SecurityIssue
+                {
+                    Title = "Authorize without role or policy restriction",
+                    Description = $"The OData endpoint '{endpoint.Route}' on {endpoint.ClassName}.{endpoint.MethodName} " +
+                                  $"requires authentication but does not specify roles or policies. Any authenticated user can access it.",
+                    Severity = SecuritySeverity.Low,
+                    SurfaceRoute = endpoint.DisplayRoute,
+                    SurfaceType = SurfaceType.ODataEndpoint,
+                    ClassName = endpoint.ClassName,
+                    MethodName = endpoint.MethodName,
                     Recommendation = "Consider adding Roles or Policy to the [Authorize] attribute to restrict access."
                 });
             }

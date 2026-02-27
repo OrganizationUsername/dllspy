@@ -12,6 +12,8 @@
         <TypeName>DllSpy.Core.Contracts.GrpcOperation</TypeName>
         <TypeName>DllSpy.Core.Contracts.RazorPageHandler</TypeName>
         <TypeName>DllSpy.Core.Contracts.BlazorRoute</TypeName>
+        <TypeName>DllSpy.Core.Contracts.AzureFunction</TypeName>
+        <TypeName>DllSpy.Core.Contracts.ODataEndpoint</TypeName>
       </ViewSelectedBy>
       <TableControl>
         <TableHeaders>
@@ -52,6 +54,8 @@
                     'GrpcOperation'   { 'gRPC' }
                     'RazorPage'       { 'Razor' }
                     'BlazorComponent' { 'Blazor' }
+                    'AzureFunction'   { 'Func' }
+                    'ODataEndpoint'   { 'OData' }
                     default           { $_.SurfaceType }
                   }
                 </ScriptBlock>
@@ -59,13 +63,16 @@
               <TableColumnItem>
                 <ScriptBlock>
                   if ($_ -is [DllSpy.Core.Contracts.HttpEndpoint]) { $_.HttpMethod }
+                  elseif ($_ -is [DllSpy.Core.Contracts.ODataEndpoint]) { $_.HttpMethod }
                   elseif ($_ -is [DllSpy.Core.Contracts.RazorPageHandler]) { $_.HttpMethod }
+                  elseif ($_ -is [DllSpy.Core.Contracts.AzureFunction]) { if ($_.HttpMethod) { $_.HttpMethod } else { 'ANY' } }
                   else { '' }
                 </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
                 <ScriptBlock>
                   if ($_ -is [DllSpy.Core.Contracts.HttpEndpoint]) { $_.Route }
+                  elseif ($_ -is [DllSpy.Core.Contracts.ODataEndpoint]) { $_.Route }
                   elseif ($_ -is [DllSpy.Core.Contracts.RazorPageHandler]) {
                     if ($_.HandlerName) { "$($_.PageRoute)?handler=$($_.HandlerName)" }
                     else { $_.PageRoute }
@@ -74,6 +81,7 @@
                   elseif ($_ -is [DllSpy.Core.Contracts.WcfOperation]) { $_.ContractName }
                   elseif ($_ -is [DllSpy.Core.Contracts.GrpcOperation]) { $_.ServiceName }
                   elseif ($_ -is [DllSpy.Core.Contracts.BlazorRoute]) { $_.RouteTemplate }
+                  elseif ($_ -is [DllSpy.Core.Contracts.AzureFunction]) { if ($_.Route) { $_.Route } else { $_.FunctionName } }
                   else { '' }
                 </ScriptBlock>
               </TableColumnItem>
@@ -840,6 +848,284 @@
               <ListItem>
                 <Label>Return Type</Label>
                 <PropertyName>ReturnType</PropertyName>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+
+    <!-- AzureFunction Table View -->
+    <View>
+      <Name>DllSpy.Core.Contracts.AzureFunction</Name>
+      <ViewSelectedBy>
+        <TypeName>DllSpy.Core.Contracts.AzureFunction</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Method</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Route</Label>
+            <Width>30</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Function</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Class</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>AuthLevel</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Auth</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>'Func'</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>if ($_.HttpMethod) { $_.HttpMethod } else { 'ANY' }</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>if ($_.Route) { $_.Route } else { $_.FunctionName }</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>FunctionName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ClassName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>AuthorizationLevel</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.RequiresAuthorization) { 'Yes' }
+                  elseif ($_.AllowAnonymous) { 'Anon' }
+                  else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+    <!-- AzureFunction List View -->
+    <View>
+      <Name>DllSpy.Core.Contracts.AzureFunction.List</Name>
+      <ViewSelectedBy>
+        <TypeName>DllSpy.Core.Contracts.AzureFunction</TypeName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>Function Name</Label>
+                <PropertyName>FunctionName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>HTTP Method</Label>
+                <ScriptBlock>if ($_.HttpMethod) { $_.HttpMethod } else { 'ANY' }</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Route</Label>
+                <ScriptBlock>if ($_.Route) { $_.Route } else { $_.FunctionName }</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Authorization Level</Label>
+                <PropertyName>AuthorizationLevel</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Class</Label>
+                <PropertyName>ClassName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Action</Label>
+                <PropertyName>MethodName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Requires Auth</Label>
+                <PropertyName>RequiresAuthorization</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Allow Anonymous</Label>
+                <PropertyName>AllowAnonymous</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Roles</Label>
+                <ScriptBlock>($_.Roles -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Policies</Label>
+                <ScriptBlock>($_.Policies -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Return Type</Label>
+                <PropertyName>ReturnType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Is Async</Label>
+                <PropertyName>IsAsync</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Parameters</Label>
+                <ScriptBlock>($_.Parameters | ForEach-Object { $_.ToString() }) -join '; '</ScriptBlock>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+
+    <!-- ODataEndpoint Table View -->
+    <View>
+      <Name>DllSpy.Core.Contracts.ODataEndpoint</Name>
+      <ViewSelectedBy>
+        <TypeName>DllSpy.Core.Contracts.ODataEndpoint</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Method</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Route</Label>
+            <Width>35</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>EntitySet</Label>
+            <Width>16</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Action</Label>
+            <Width>16</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Query</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Auth</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>'OData'</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>HttpMethod</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Route</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>EntitySetName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>MethodName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>if ($_.HasEnableQuery) { 'Yes' } else { 'No' }</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.RequiresAuthorization) { 'Yes' }
+                  elseif ($_.AllowAnonymous) { 'Anon' }
+                  else { 'No' }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+    <!-- ODataEndpoint List View -->
+    <View>
+      <Name>DllSpy.Core.Contracts.ODataEndpoint.List</Name>
+      <ViewSelectedBy>
+        <TypeName>DllSpy.Core.Contracts.ODataEndpoint</TypeName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>HTTP Method</Label>
+                <PropertyName>HttpMethod</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Route</Label>
+                <PropertyName>Route</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Entity Set</Label>
+                <PropertyName>EntitySetName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Enable Query</Label>
+                <PropertyName>HasEnableQuery</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Class</Label>
+                <PropertyName>ClassName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Action</Label>
+                <PropertyName>MethodName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Requires Auth</Label>
+                <PropertyName>RequiresAuthorization</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Allow Anonymous</Label>
+                <PropertyName>AllowAnonymous</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Roles</Label>
+                <ScriptBlock>($_.Roles -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Policies</Label>
+                <ScriptBlock>($_.Policies -join ', ')</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>Return Type</Label>
+                <PropertyName>ReturnType</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Is Async</Label>
+                <PropertyName>IsAsync</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Parameters</Label>
+                <ScriptBlock>($_.Parameters | ForEach-Object { $_.ToString() }) -join '; '</ScriptBlock>
               </ListItem>
             </ListItems>
           </ListEntry>

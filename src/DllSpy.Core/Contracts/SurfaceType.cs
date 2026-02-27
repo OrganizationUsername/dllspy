@@ -18,6 +18,8 @@ namespace DllSpy.Core.Contracts
         /// <summary>A routable Blazor component.</summary>
         BlazorComponent,
         /// <summary>An Azure Functions HTTP-triggered function.</summary>
-        AzureFunction
+        AzureFunction,
+        /// <summary>An OData endpoint on an ODataController.</summary>
+        ODataEndpoint
     }
 }

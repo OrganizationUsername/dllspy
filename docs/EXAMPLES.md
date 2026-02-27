@@ -148,6 +148,26 @@ Search-DllSpy -Path .\MyApp.dll -Type BlazorComponent |
     Format-Table RouteTemplate, ComponentName
 ```
 
+## Audit Azure Functions
+
+Find all Azure Functions with anonymous authorization level and no `[Authorize]`:
+
+```powershell
+Search-DllSpy -Path .\MyFuncApp.dll -Type AzureFunction |
+    Where-Object { -not $_.RequiresAuthorization } |
+    Format-Table FunctionName, Route, HttpMethod, AuthorizationLevel
+```
+
+## Audit OData Endpoints
+
+Find all unauthenticated OData endpoints that expose `[EnableQuery]`:
+
+```powershell
+Search-DllSpy -Path .\MyApi.dll -Type ODataEndpoint |
+    Where-Object { -not $_.RequiresAuthorization -and $_.HasEnableQuery } |
+    Format-Table Route, EntitySetName, HttpMethod
+```
+
 ## Interactive Exploration with Format-List
 
 Get full details on a specific HTTP endpoint:

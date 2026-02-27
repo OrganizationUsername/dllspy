@@ -13,6 +13,27 @@ namespace DllSpy.Core.Tests.Fixtures
 
     public class ComponentBase { }
 
+    // OData base class (inherits ControllerBase to match real hierarchy)
+    public class ODataController : ControllerBase { }
+
+    // OData attributes
+    [AttributeUsage(AttributeTargets.Method)]
+    public class EnableQueryAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ODataRoutePrefixAttribute : Attribute
+    {
+        public string Template { get; }
+        public ODataRoutePrefixAttribute(string template) { Template = template; }
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ODataRouteAttribute : Attribute
+    {
+        public string Template { get; }
+        public ODataRouteAttribute(string template) { Template = template; }
+    }
+
     // Security attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class AuthorizeAttribute : Attribute

@@ -14,14 +14,14 @@
       <command:verb>Search</command:verb>
       <command:noun>DllSpy</command:noun>
       <maml:description>
-        <maml:para>Discovers input surfaces (HTTP endpoints, SignalR hub methods) in compiled .NET assemblies using reflection.</maml:para>
+        <maml:para>Discovers input surfaces (HTTP endpoints, SignalR hub methods, WCF operations, gRPC operations, Razor Pages, Blazor components, Azure Functions, and OData endpoints) in compiled .NET assemblies using reflection.</maml:para>
       </maml:description>
     </command:details>
 
     <maml:description>
-      <maml:para>Scans one or more .NET assemblies for ASP.NET Core controllers and SignalR hubs, extracting all input surfaces with their routes, HTTP methods, authorization requirements, parameters, and return types.</maml:para>
-      <maml:para>HTTP endpoints are detected by controller inheritance (ControllerBase, Controller, ApiController), the [ApiController] attribute, or by naming convention. SignalR hubs are detected by inheritance from Hub or Hub&lt;T&gt;.</maml:para>
-      <maml:para>Routes for HTTP endpoints are resolved by combining controller-level and action-level [Route] templates. SignalR hub routes use conventional naming (strip "Hub" suffix).</maml:para>
+      <maml:para>Scans one or more .NET assemblies for ASP.NET Core controllers, SignalR hubs, WCF services, gRPC services, Razor Pages, Blazor components, Azure Functions, and OData controllers, extracting all input surfaces with their routes, HTTP methods, authorization requirements, parameters, and return types.</maml:para>
+      <maml:para>HTTP endpoints are detected by controller inheritance (ControllerBase, Controller, ApiController), the [ApiController] attribute, or by naming convention. OData endpoints are detected by inheritance from ODataController. SignalR hubs are detected by inheritance from Hub or Hub&lt;T&gt;. Azure Functions are detected by [FunctionName] or [Function] attributes with HTTP triggers.</maml:para>
+      <maml:para>Routes for HTTP endpoints are resolved by combining controller-level and action-level [Route] templates. OData routes use [ODataRoutePrefix] or fall back to odata/{entitySet} convention. SignalR hub routes use conventional naming (strip "Hub" suffix).</maml:para>
     </maml:description>
 
     <command:syntax>
@@ -68,7 +68,7 @@
       <command:parameter required="false">
         <maml:name>Type</maml:name>
         <maml:description>
-          <maml:para>Filter surfaces by type. Valid values: HttpEndpoint, SignalRMethod. When omitted, all surface types are returned.</maml:para>
+          <maml:para>Filter surfaces by type. Valid values: HttpEndpoint, SignalRMethod, WcfOperation, GrpcOperation, RazorPage, BlazorComponent, AzureFunction, ODataEndpoint. When omitted, all surface types are returned.</maml:para>
         </maml:description>
         <command:parameterValue required="true">SurfaceType</command:parameterValue>
         <dev:type>
@@ -80,7 +80,7 @@
       <command:parameter required="false">
         <maml:name>HttpMethod</maml:name>
         <maml:description>
-          <maml:para>Filter HTTP endpoints by HTTP method. Valid values: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS. Only applies to HttpEndpoint surfaces.</maml:para>
+          <maml:para>Filter by HTTP method. Valid values: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS. Applies to HttpEndpoint, ODataEndpoint, RazorPage, and AzureFunction surfaces.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:type>
@@ -143,7 +143,7 @@
           <maml:name>DllSpy.Core.Contracts.InputSurface</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para>Objects representing discovered input surfaces. HttpEndpoint objects include Route, HttpMethod, ClassName, MethodName, and authorization details. SignalRMethod objects include HubName, HubRoute, MethodName, streaming flags, and authorization details.</maml:para>
+          <maml:para>Objects representing discovered input surfaces. Each surface type includes ClassName, MethodName, and authorization details. HttpEndpoint includes Route and HttpMethod. ODataEndpoint includes Route, HttpMethod, EntitySetName, and HasEnableQuery. SignalRMethod includes HubName, HubRoute, and streaming flags. AzureFunction includes FunctionName, Route, HttpMethod, and AuthorizationLevel.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
@@ -160,7 +160,7 @@
         <maml:title>Example 1: Discover all surfaces</maml:title>
         <dev:code>Search-DllSpy -Path .\MyApi.dll</dev:code>
         <dev:remarks>
-          <maml:para>Scans MyApi.dll and returns all discovered HTTP endpoints and SignalR hub methods.</maml:para>
+          <maml:para>Scans MyApi.dll and returns all discovered input surfaces.</maml:para>
         </dev:remarks>
       </command:example>
 
@@ -168,7 +168,7 @@
         <maml:title>Example 2: Only HTTP endpoints</maml:title>
         <dev:code>Search-DllSpy -Path .\MyApi.dll -Type HttpEndpoint</dev:code>
         <dev:remarks>
-          <maml:para>Returns only HTTP endpoints, excluding SignalR methods.</maml:para>
+          <maml:para>Returns only HTTP endpoints, excluding all other surface types.</maml:para>
         </dev:remarks>
       </command:example>
 
@@ -220,13 +220,16 @@
     </command:details>
 
     <maml:description>
-      <maml:para>Scans one or more .NET assemblies and applies security analysis rules to every discovered input surface (HTTP endpoints and SignalR hub methods). Issues are categorized by severity:</maml:para>
-      <maml:para>HTTP endpoints:</maml:para>
+      <maml:para>Scans one or more .NET assemblies and applies security analysis rules to every discovered input surface (HTTP endpoints, OData endpoints, SignalR hub methods, WCF operations, gRPC operations, Razor Pages, Blazor components, and Azure Functions). Issues are categorized by severity:</maml:para>
+      <maml:para>HTTP and OData endpoints:</maml:para>
       <maml:para>- High: State-changing endpoints (DELETE, POST, PUT, PATCH) without [Authorize]</maml:para>
       <maml:para>- Medium: Endpoints with neither [Authorize] nor [AllowAnonymous] (unclear security intent)</maml:para>
       <maml:para>- Low: [Authorize] present but without specific Roles or Policy</maml:para>
-      <maml:para>SignalR hub methods:</maml:para>
-      <maml:para>- High: Hub methods without [Authorize] (directly invocable by clients)</maml:para>
+      <maml:para>SignalR hub methods, WCF/gRPC operations, Blazor components:</maml:para>
+      <maml:para>- High: Surfaces without [Authorize] (directly invocable by clients)</maml:para>
+      <maml:para>- Low: [Authorize] present but without specific Roles or Policy</maml:para>
+      <maml:para>Azure Functions:</maml:para>
+      <maml:para>- High: AuthorizationLevel.Anonymous without [Authorize]</maml:para>
       <maml:para>- Low: [Authorize] present but without specific Roles or Policy</maml:para>
       <maml:para>Each issue includes a description of the problem and a remediation recommendation.</maml:para>
     </maml:description>
@@ -278,7 +281,7 @@
       <command:parameter required="false">
         <maml:name>Type</maml:name>
         <maml:description>
-          <maml:para>Filter issues by surface type. Valid values: HttpEndpoint, SignalRMethod. When omitted, issues for all surface types are returned.</maml:para>
+          <maml:para>Filter issues by surface type. Valid values: HttpEndpoint, SignalRMethod, WcfOperation, GrpcOperation, RazorPage, BlazorComponent, AzureFunction, ODataEndpoint. When omitted, issues for all surface types are returned.</maml:para>
         </maml:description>
         <command:parameterValue required="true">SurfaceType</command:parameterValue>
         <dev:type>

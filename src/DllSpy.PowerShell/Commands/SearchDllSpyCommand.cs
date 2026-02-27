@@ -107,8 +107,10 @@ namespace DllSpy.PowerShell.Commands
             if (!string.IsNullOrEmpty(HttpMethod))
             {
                 surfaces = surfaces.Where(s =>
-                    s is HttpEndpoint http &&
-                    string.Equals(http.HttpMethod, HttpMethod, StringComparison.OrdinalIgnoreCase));
+                    (s is HttpEndpoint http && string.Equals(http.HttpMethod, HttpMethod, StringComparison.OrdinalIgnoreCase)) ||
+                    (s is ODataEndpoint odata && string.Equals(odata.HttpMethod, HttpMethod, StringComparison.OrdinalIgnoreCase)) ||
+                    (s is RazorPageHandler razor && string.Equals(razor.HttpMethod, HttpMethod, StringComparison.OrdinalIgnoreCase)) ||
+                    (s is AzureFunction func && string.Equals(func.HttpMethod, HttpMethod, StringComparison.OrdinalIgnoreCase)));
             }
 
             if (RequiresAuth.IsPresent)

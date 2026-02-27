@@ -195,6 +195,7 @@ namespace DllSpy.Cli
         private static string GetMethod(InputSurface surface) => surface switch
         {
             HttpEndpoint http => http.HttpMethod,
+            ODataEndpoint odata => odata.HttpMethod,
             RazorPageHandler razor => razor.HttpMethod,
             AzureFunction func => func.HttpMethod ?? "ANY",
             _ => string.Empty
@@ -203,6 +204,7 @@ namespace DllSpy.Cli
         private static string GetRoute(InputSurface surface) => surface switch
         {
             HttpEndpoint http => http.Route,
+            ODataEndpoint odata => odata.Route,
             RazorPageHandler razor => string.IsNullOrEmpty(razor.HandlerName)
                 ? razor.PageRoute
                 : $"{razor.PageRoute}?handler={razor.HandlerName}",
@@ -223,6 +225,7 @@ namespace DllSpy.Cli
             SurfaceType.RazorPage => "Razor",
             SurfaceType.BlazorComponent => "Blazor",
             SurfaceType.AzureFunction => "Func",
+            SurfaceType.ODataEndpoint => "OData",
             _ => surface.SurfaceType.ToString()
         };
 

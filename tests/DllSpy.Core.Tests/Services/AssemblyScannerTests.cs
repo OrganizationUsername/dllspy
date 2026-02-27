@@ -29,13 +29,14 @@ namespace DllSpy.Core.Tests.Services
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.RazorPage);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.BlazorComponent);
             Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.AzureFunction);
+            Assert.Contains(_report.Surfaces, s => s.SurfaceType == SurfaceType.ODataEndpoint);
         }
 
         [Fact]
         public void TotalSurfaces_IsCorrect()
         {
-            // 12 HTTP + 5 SignalR + 6 WCF + 6 gRPC + 11 Razor + 6 Blazor + 8 AzureFunc = 54
-            Assert.Equal(54, _report.TotalSurfaces);
+            // 12 HTTP + 5 SignalR + 6 WCF + 6 gRPC + 11 Razor + 6 Blazor + 8 AzureFunc + 8 OData = 62
+            Assert.Equal(62, _report.TotalSurfaces);
         }
 
         [Fact]
@@ -57,7 +58,8 @@ namespace DllSpy.Core.Tests.Services
             // + IndexModel, ContactModel, DetailsModel, EditModel, DashboardModel, LoginModel
             // + Counter, WeatherForecast, AdminSettings, UserProfile, PublicInfo
             // + ProductFunctions, OrderFunctions, NotificationFunctions, HealthFunctions
-            Assert.Equal(27, _report.TotalClasses);
+            // + Products, Orders, Customers (OData)
+            Assert.Equal(30, _report.TotalClasses);
         }
 
         [Fact]
@@ -68,14 +70,16 @@ namespace DllSpy.Core.Tests.Services
             // Razor: DashboardModel.OnGet, DashboardModel.OnPostExportAsync, LoginModel.OnPostAsync
             // Blazor: AdminSettings, UserProfile
             // AzureFunc: GetProductById, GetOrders, PlaceOrder, SendNotification
-            Assert.Equal(21, _report.AuthenticatedSurfaces);
+            // OData: OrdersOData.Get, OrdersOData.Post, CustomersOData.Get
+            Assert.Equal(24, _report.AuthenticatedSurfaces);
         }
 
         [Fact]
         public void AnonymousSurfaces_CountIsCorrect()
         {
-            // AllowAnonymous or !RequiresAuthorization = 33
-            Assert.Equal(33, _report.AnonymousSurfaces);
+            // AllowAnonymous or !RequiresAuthorization = 38
+            // +5: Products(4 no auth) + Customers.GetById(AllowAnonymous)
+            Assert.Equal(38, _report.AnonymousSurfaces);
         }
 
         [Fact]
@@ -89,7 +93,8 @@ namespace DllSpy.Core.Tests.Services
             // Razor: ContactModel.OnPostAsync, EditModel.OnPostAsync, EditModel.OnPostDeleteAsync
             // Blazor: Counter, WeatherForecast(/weather), WeatherForecast(/forecast)
             // AzureFunc: GetProducts, CreateProduct, HealthCheck
-            Assert.Equal(20, highIssues.Count);
+            // OData: Products.Post (POST), Products.Delete (DELETE)
+            Assert.Equal(22, highIssues.Count);
         }
 
         [Fact]
@@ -98,7 +103,8 @@ namespace DllSpy.Core.Tests.Services
             var mediumIssues = _report.SecurityIssues.Where(i => i.Severity == SecuritySeverity.Medium).ToList();
             // UsersController.GetAll, UsersController.GetById, PlainController.Index, PlainController.Details
             // Razor: IndexModel.OnGet, ContactModel.OnGet, DetailsModel.OnGet, EditModel.OnGet
-            Assert.Equal(8, mediumIssues.Count);
+            // OData: Products.Get, Products.Get(key)
+            Assert.Equal(10, mediumIssues.Count);
         }
 
         [Fact]
@@ -110,14 +116,15 @@ namespace DllSpy.Core.Tests.Services
             // Razor: LoginModel.OnPostAsync
             // Blazor: UserProfile
             // AzureFunc: GetProductById, SendNotification
-            Assert.Equal(10, lowIssues.Count);
+            // OData: Customers.Get ([Authorize] without roles)
+            Assert.Equal(11, lowIssues.Count);
         }
 
         [Fact]
         public void TotalSecurityIssues_IsCorrect()
         {
-            // 20 HIGH + 8 MEDIUM + 10 LOW = 38
-            Assert.Equal(38, _report.TotalSecurityIssues);
+            // 22 HIGH + 10 MEDIUM + 11 LOW = 43
+            Assert.Equal(43, _report.TotalSecurityIssues);
         }
 
         [Fact]

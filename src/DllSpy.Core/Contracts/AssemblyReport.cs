@@ -48,6 +48,9 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets the number of Azure Functions discovered.</summary>
         public int TotalAzureFunctions => Surfaces.Count(s => s.SurfaceType == SurfaceType.AzureFunction);
 
+        /// <summary>Gets the number of OData endpoints discovered.</summary>
+        public int TotalODataEndpoints => Surfaces.Count(s => s.SurfaceType == SurfaceType.ODataEndpoint);
+
         /// <summary>Gets the number of distinct classes found.</summary>
         public int TotalClasses => Surfaces.Select(s => s.ClassName).Distinct().Count();
 

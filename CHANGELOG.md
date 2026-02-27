@@ -1,5 +1,21 @@
 ## [Unreleased]
 
+### Added
+- **Azure Functions discovery** — detects `[FunctionName]` / `[Function]` methods with `[HttpTrigger]` parameters, extracts route, HTTP method, and `AuthorizationLevel`
+- `AzureFunction` surface type with `FunctionName`, `Route`, `HttpMethod`, `AuthorizationLevel` properties
+- Azure Functions security rules: unauthenticated function (High), authorize without role/policy (Low)
+- `TotalAzureFunctions` computed property on `AssemblyReport`
+- CLI type label `Func` and `--method` filter support for Azure Functions
+- PowerShell formatter views for `AzureFunction` (table + list)
+- **OData endpoint discovery** — detects controllers inheriting from `ODataController`, resolves routes from `[ODataRoutePrefix]` / `[Route]` / `odata/{entitySet}` convention, detects `[EnableQuery]`
+- `ODataEndpoint` surface type with `Route`, `HttpMethod`, `EntitySetName`, `HasEnableQuery` properties
+- OData security rules: unauthenticated state-changing endpoint (High), missing auth declaration (Medium), authorize without role/policy (Low)
+- `TotalODataEndpoints` computed property on `AssemblyReport`
+- CLI type label `OData` and `--method` filter support for OData endpoints
+- PowerShell formatter views for `ODataEndpoint` (table + list)
+- PowerShell `-HttpMethod` filter now also matches `ODataEndpoint`, `RazorPageHandler`, and `AzureFunction` (previously only `HttpEndpoint`)
+- OData controllers excluded from HTTP endpoint discovery (no duplicates)
+
 ## [0.2.6] - 2026-02-26
 
 ### Fixed

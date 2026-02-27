@@ -131,6 +131,9 @@ namespace DllSpy.Core.Services
             if (type == null || !type.IsClass || type.IsAbstract || !type.IsPublic)
                 return false;
 
+            if (InheritsFromODataController(type))
+                return false;
+
             if (InheritsFromController(type))
                 return true;
 
@@ -150,10 +153,22 @@ namespace DllSpy.Core.Services
             {
                 var name = current.Name;
                 if (name == "Controller" || name == "ControllerBase" ||
-                    name == "ApiController" || name == "ODataController")
+                    name == "ApiController")
                 {
                     return true;
                 }
+                current = current.BaseType;
+            }
+            return false;
+        }
+
+        private static bool InheritsFromODataController(Type type)
+        {
+            var current = type.BaseType;
+            while (current != null)
+            {
+                if (current.Name == "ODataController")
+                    return true;
                 current = current.BaseType;
             }
             return false;

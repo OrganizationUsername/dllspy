@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/n7on/dllspy/actions/workflows/ci.yml/badge.svg)](https://github.com/n7on/dllspy/actions/workflows/ci.yml) [![NuGet Version](https://img.shields.io/nuget/v/DllSpy)](https://www.nuget.org/packages/DllSpy) [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/DllSpy)](https://www.powershellgallery.com/packages/DllSpy) [![License](https://img.shields.io/github/license/n7on/dllspy)](https://github.com/n7on/dllspy/blob/main/LICENSE)
 
-Scans compiled .NET assemblies to discover input surfaces (HTTP endpoints, SignalR hubs, WCF services, gRPC services, Razor Pages, Blazor components), check authorization configuration, and flag security issues — all without running the application.
+Scans compiled .NET assemblies to discover input surfaces (HTTP endpoints, SignalR hubs, WCF services, gRPC services, Razor Pages, Blazor components, Azure Functions, OData endpoints), check authorization configuration, and flag security issues — all without running the application.
 
 Available as a **CLI tool** and a **PowerShell module**.
 
@@ -33,7 +33,7 @@ dllspy ./MyApi.dll
 # Scan for security vulnerabilities
 dllspy ./MyApi.dll -s
 
-# Filter by surface type (HttpEndpoint, SignalRMethod, WcfOperation, GrpcOperation, RazorPage, BlazorComponent)
+# Filter by surface type (HttpEndpoint, SignalRMethod, WcfOperation, GrpcOperation, RazorPage, BlazorComponent, AzureFunction, ODataEndpoint)
 dllspy ./MyApi.dll -t HttpEndpoint
 
 # Filter by HTTP method and class name
@@ -77,6 +77,8 @@ Search-DllSpy -Path .\MyApi.dll -Type WcfOperation
 Search-DllSpy -Path .\MyApi.dll -Type GrpcOperation
 Search-DllSpy -Path .\MyApi.dll -Type RazorPage
 Search-DllSpy -Path .\MyApi.dll -Type BlazorComponent
+Search-DllSpy -Path .\MyApi.dll -Type AzureFunction
+Search-DllSpy -Path .\MyApi.dll -Type ODataEndpoint
 
 # Filter by HTTP method
 Search-DllSpy -Path .\MyApi.dll -HttpMethod DELETE
@@ -108,6 +110,8 @@ Test-DllSpy -Path .\MyApi.dll | Format-List
 | **gRPC** | Generated base class with `BindService` | `GrpcOperation` |
 | **Razor Pages** | `PageModel` inheritance, `On{Verb}[Handler][Async]` methods | `RazorPage` |
 | **Blazor** | `ComponentBase` inheritance + `[Route]` attribute | `BlazorComponent` |
+| **Azure Functions** | `[FunctionName]` / `[Function]` + `[HttpTrigger]` parameter | `AzureFunction` |
+| **OData** | `ODataController` inheritance | `ODataEndpoint` |
 
 ## Security Rules
 
@@ -153,6 +157,21 @@ Test-DllSpy -Path .\MyApi.dll | Format-List
 | Severity | Rule | Description |
 |----------|------|-------------|
 | **High** | Unauthenticated routable component | Component with `[Route]` but without `[Authorize]` |
+| **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
+
+### Azure Functions
+
+| Severity | Rule | Description |
+|----------|------|-------------|
+| **High** | Unauthenticated Azure Function | `AuthorizationLevel.Anonymous` and no `[Authorize]` attribute |
+| **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
+
+### OData Endpoints
+
+| Severity | Rule | Description |
+|----------|------|-------------|
+| **High** | Unauthenticated state-changing endpoint | `DELETE`, `POST`, `PUT`, or `PATCH` without `[Authorize]` |
+| **Medium** | Missing authorization declaration | Endpoint has neither `[Authorize]` nor `[AllowAnonymous]` |
 | **Low** | Authorize without role/policy | `[Authorize]` present but no `Roles` or `Policy` specified |
 
 ## License
