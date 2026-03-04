@@ -13,6 +13,8 @@ namespace DllSpy.Core.Services
     public class AssemblyScanner
     {
         private readonly IDiscovery[] _discoveries;
+        private static List<string> _sharedFrameworkPaths;
+        private static readonly object _sharedFrameworkLock = new object();
 
         /// <summary>
         /// Initializes a new instance of <see cref="AssemblyScanner"/>.
@@ -34,6 +36,11 @@ namespace DllSpy.Core.Services
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"Assembly not found: {fullPath}", fullPath);
 
+            // Skip satellite/resource assemblies — they contain only localized resources,
+            // never API surfaces, and cannot be loaded as regular assemblies.
+            if (fullPath.EndsWith(".resources.dll", StringComparison.OrdinalIgnoreCase))
+                return EmptyReport(fullPath);
+
             var assemblyDir = Path.GetDirectoryName(fullPath);
             var probePaths = GetProbePaths(assemblyDir);
 
@@ -47,13 +54,13 @@ namespace DllSpy.Core.Services
                 {
                     assembly = Assembly.LoadFrom(fullPath);
                 }
-                catch (BadImageFormatException ex)
+                catch (BadImageFormatException)
                 {
-                    throw new InvalidOperationException($"The file is not a valid .NET assembly: {fullPath}", ex);
+                    return EmptyReport(fullPath);
                 }
-                catch (FileLoadException ex)
+                catch (FileLoadException)
                 {
-                    throw new InvalidOperationException($"Failed to load assembly: {fullPath}", ex);
+                    return EmptyReport(fullPath);
                 }
 
                 var report = ScanAssembly(assembly);
@@ -64,6 +71,18 @@ namespace DllSpy.Core.Services
             {
                 AppDomain.CurrentDomain.AssemblyResolve -= resolver;
             }
+        }
+
+        private static AssemblyReport EmptyReport(string fullPath)
+        {
+            return new AssemblyReport
+            {
+                AssemblyPath = fullPath,
+                AssemblyName = Path.GetFileNameWithoutExtension(fullPath),
+                ScanTimestamp = DateTime.UtcNow,
+                Surfaces = new List<InputSurface>(),
+                SecurityIssues = new List<SecurityIssue>()
+            };
         }
 
         private static Assembly ResolveAssembly(string fullName, List<string> probePaths)
@@ -81,27 +100,43 @@ namespace DllSpy.Core.Services
             return null;
         }
 
+        private static List<string> GetSharedFrameworkPaths()
+        {
+            if (_sharedFrameworkPaths != null)
+                return _sharedFrameworkPaths;
+
+            lock (_sharedFrameworkLock)
+            {
+                if (_sharedFrameworkPaths != null)
+                    return _sharedFrameworkPaths;
+
+                var paths = new List<string>();
+                try
+                {
+                    var sharedDir = FindSharedFrameworkDir();
+                    if (sharedDir != null)
+                    {
+                        foreach (var framework in Directory.GetDirectories(sharedDir))
+                        {
+                            try
+                            {
+                                paths.AddRange(Directory.GetDirectories(framework));
+                            }
+                            catch { /* skip inaccessible directories */ }
+                        }
+                    }
+                }
+                catch { /* shared framework discovery is best-effort */ }
+
+                _sharedFrameworkPaths = paths;
+                return _sharedFrameworkPaths;
+            }
+        }
+
         private static List<string> GetProbePaths(string assemblyDir)
         {
             var paths = new List<string> { assemblyDir };
-
-            try
-            {
-                var sharedDir = FindSharedFrameworkDir();
-                if (sharedDir != null)
-                {
-                    foreach (var framework in Directory.GetDirectories(sharedDir))
-                    {
-                        try
-                        {
-                            paths.AddRange(Directory.GetDirectories(framework));
-                        }
-                        catch { /* skip inaccessible directories */ }
-                    }
-                }
-            }
-            catch { /* shared framework discovery is best-effort */ }
-
+            paths.AddRange(GetSharedFrameworkPaths());
             return paths;
         }
 
@@ -181,15 +216,24 @@ namespace DllSpy.Core.Services
             var surfaces = new List<InputSurface>();
             foreach (var discovery in _discoveries)
             {
-                surfaces.AddRange(discovery.Discover(assembly));
+                try
+                {
+                    surfaces.AddRange(discovery.Discover(assembly));
+                }
+                catch (FileLoadException) { }
+                catch (TypeLoadException) { }
             }
+
+            var assemblyName = assembly.GetName().Name;
+            foreach (var surface in surfaces)
+                surface.AssemblyName = assemblyName;
 
             var securityIssues = AnalyzeSecurityIssues(surfaces);
 
             return new AssemblyReport
             {
                 AssemblyPath = assembly.Location,
-                AssemblyName = assembly.GetName().Name,
+                AssemblyName = assemblyName,
                 ScanTimestamp = DateTime.UtcNow,
                 Surfaces = surfaces,
                 SecurityIssues = securityIssues

@@ -70,20 +70,7 @@
                 </ScriptBlock>
               </TableColumnItem>
               <TableColumnItem>
-                <ScriptBlock>
-                  if ($_ -is [DllSpy.Core.Contracts.HttpEndpoint]) { $_.Route }
-                  elseif ($_ -is [DllSpy.Core.Contracts.ODataEndpoint]) { $_.Route }
-                  elseif ($_ -is [DllSpy.Core.Contracts.RazorPageHandler]) {
-                    if ($_.HandlerName) { "$($_.PageRoute)?handler=$($_.HandlerName)" }
-                    else { $_.PageRoute }
-                  }
-                  elseif ($_ -is [DllSpy.Core.Contracts.SignalRMethod]) { $_.HubRoute }
-                  elseif ($_ -is [DllSpy.Core.Contracts.WcfOperation]) { $_.ContractName }
-                  elseif ($_ -is [DllSpy.Core.Contracts.GrpcOperation]) { $_.ServiceName }
-                  elseif ($_ -is [DllSpy.Core.Contracts.BlazorRoute]) { $_.RouteTemplate }
-                  elseif ($_ -is [DllSpy.Core.Contracts.AzureFunction]) { if ($_.Route) { $_.Route } else { $_.FunctionName } }
-                  else { '' }
-                </ScriptBlock>
+                <PropertyName>Route</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>ClassName</PropertyName>

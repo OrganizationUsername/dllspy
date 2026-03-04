@@ -9,7 +9,7 @@ namespace DllSpy.Core.Contracts
         public override SurfaceType SurfaceType => SurfaceType.HttpEndpoint;
 
         /// <summary>Gets or sets the full route template for this endpoint.</summary>
-        public string Route { get; set; }
+        public override string Route { get; set; }
 
         /// <summary>Gets or sets the HTTP method (GET, POST, PUT, DELETE, PATCH, etc.).</summary>
         public string HttpMethod { get; set; }

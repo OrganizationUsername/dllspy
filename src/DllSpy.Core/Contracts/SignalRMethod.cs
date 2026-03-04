@@ -11,6 +11,9 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets or sets the conventional hub route (e.g. "chat" for ChatHub).</summary>
         public string HubRoute { get; set; }
 
+        /// <inheritdoc />
+        public override string Route { get => $"{HubRoute}/{MethodName}"; set => HubRoute = value; }
+
         /// <summary>Gets or sets the hub class name.</summary>
         public string HubName { get; set; }
 

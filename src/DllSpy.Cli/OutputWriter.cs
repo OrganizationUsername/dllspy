@@ -201,20 +201,7 @@ namespace DllSpy.Cli
             _ => string.Empty
         };
 
-        private static string GetRoute(InputSurface surface) => surface switch
-        {
-            HttpEndpoint http => http.Route,
-            ODataEndpoint odata => odata.Route,
-            RazorPageHandler razor => string.IsNullOrEmpty(razor.HandlerName)
-                ? razor.PageRoute
-                : $"{razor.PageRoute}?handler={razor.HandlerName}",
-            SignalRMethod signalr => signalr.HubRoute,
-            WcfOperation wcf => wcf.ContractName,
-            GrpcOperation grpc => grpc.ServiceName,
-            BlazorRoute blazor => blazor.RouteTemplate,
-            AzureFunction func => func.Route ?? func.FunctionName,
-            _ => string.Empty
-        };
+        private static string GetRoute(InputSurface surface) => surface.Route ?? string.Empty;
 
         private static string GetTypeLabel(InputSurface surface) => surface.SurfaceType switch
         {

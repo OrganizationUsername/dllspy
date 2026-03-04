@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -25,6 +26,10 @@ namespace DllSpy.Core.Helpers
             catch (ReflectionTypeLoadException ex)
             {
                 return ex.Types.Where(t => t != null).ToArray();
+            }
+            catch (FileLoadException)
+            {
+                return Array.Empty<Type>();
             }
         }
 

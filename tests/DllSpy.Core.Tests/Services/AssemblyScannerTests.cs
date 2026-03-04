@@ -158,13 +158,33 @@ namespace DllSpy.Core.Tests.Services
         }
 
         [Fact]
-        public void ScanAssembly_WithNonAssemblyFile_ThrowsInvalidOperationException()
+        public void ScanAssembly_WithNonAssemblyFile_ReturnsEmptyReport()
         {
             var tempFile = Path.GetTempFileName();
             try
             {
                 File.WriteAllText(tempFile, "not a .NET assembly");
-                Assert.Throws<InvalidOperationException>(() => _scanner.ScanAssembly(tempFile));
+                var report = _scanner.ScanAssembly(tempFile);
+                Assert.Empty(report.Surfaces);
+                Assert.Empty(report.SecurityIssues);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [Fact]
+        public void ScanAssembly_WithResourceDll_ReturnsEmptyReport()
+        {
+            var tempFile = Path.Combine(Path.GetTempPath(), "Test.resources.dll");
+            try
+            {
+                File.WriteAllText(tempFile, "dummy");
+                var report = _scanner.ScanAssembly(tempFile);
+                Assert.Empty(report.Surfaces);
+                Assert.Empty(report.SecurityIssues);
+                Assert.Equal(tempFile, report.AssemblyPath);
             }
             finally
             {

@@ -10,6 +10,9 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets the kind of input surface.</summary>
         public abstract SurfaceType SurfaceType { get; }
 
+        /// <summary>Gets or sets the assembly name that contains this surface.</summary>
+        public string AssemblyName { get; set; }
+
         /// <summary>Gets or sets the class name (controller name, hub name, etc.).</summary>
         public string ClassName { get; set; }
 
@@ -39,6 +42,9 @@ namespace DllSpy.Core.Contracts
 
         /// <summary>Gets or sets the parameters of the method.</summary>
         public List<EndpointParameterInfo> Parameters { get; set; } = new List<EndpointParameterInfo>();
+
+        /// <summary>Gets or sets the route for this surface.</summary>
+        public virtual string Route { get; set; }
 
         /// <summary>Gets the formatted display route for this surface (e.g. "GET api/users" or "WS chat/Send").</summary>
         public abstract string DisplayRoute { get; }

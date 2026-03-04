@@ -11,6 +11,13 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets or sets the inferred page route (e.g. "/Products/Details").</summary>
         public string PageRoute { get; set; }
 
+        /// <inheritdoc />
+        public override string Route
+        {
+            get => HandlerName != null ? $"{PageRoute}?handler={HandlerName}" : PageRoute;
+            set => PageRoute = value;
+        }
+
         /// <summary>Gets or sets the HTTP method parsed from the handler name (e.g. "GET", "POST").</summary>
         public string HttpMethod { get; set; }
 

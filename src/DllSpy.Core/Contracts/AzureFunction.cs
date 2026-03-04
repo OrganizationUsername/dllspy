@@ -12,7 +12,7 @@ namespace DllSpy.Core.Contracts
         public string FunctionName { get; set; }
 
         /// <summary>Gets or sets the route template from [HttpTrigger].</summary>
-        public string Route { get; set; }
+        public override string Route { get; set; }
 
         /// <summary>Gets or sets the HTTP method (GET, POST, etc.) or null for any.</summary>
         public string HttpMethod { get; set; }

@@ -11,6 +11,9 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets or sets the service contract interface name (e.g. "IOrderService").</summary>
         public string ContractName { get; set; }
 
+        /// <inheritdoc />
+        public override string Route { get => null; set { } }
+
         /// <summary>Gets or sets the namespace from [ServiceContract(Namespace=...)].</summary>
         public string ServiceNamespace { get; set; }
 

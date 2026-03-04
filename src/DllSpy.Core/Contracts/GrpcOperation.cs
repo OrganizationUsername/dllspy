@@ -11,6 +11,9 @@ namespace DllSpy.Core.Contracts
         /// <summary>Gets or sets the gRPC service name (e.g. "GreeterService").</summary>
         public string ServiceName { get; set; }
 
+        /// <inheritdoc />
+        public override string Route { get => $"{ServiceName}/{MethodName}"; set => ServiceName = value; }
+
         /// <summary>Gets or sets the gRPC method type (Unary, ServerStreaming, ClientStreaming, BidiStreaming).</summary>
         public GrpcMethodType MethodType { get; set; }
 
